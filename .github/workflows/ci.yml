@@ -25,6 +25,12 @@ jobs:
       run:
         working-directory: ${{ matrix.project }}
 
+    env:
+      # Dummy solo para que "prisma generate" no truene por falta de la variable
+      # (no se conecta de verdad a MySQL en este paso, solo genera tipos).
+      DATABASE_URL: "mysql://user:pass@localhost:3306/ci"
+      JWT_SECRET: "ci-only-secret"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,3 +45,6 @@ jobs:
 
       - name: Build project
         run: npm run build --if-present
+
+      - name: Run tests
+        run: npm test --if-present
