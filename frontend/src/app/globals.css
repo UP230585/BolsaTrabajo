@@ -1,26 +1,32 @@
 @import "tailwindcss";
 
+/* Paleta de la Guía de Estilos (SDD, capítulo 10) */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1a1a1a;
+
+  --color-navy: #1f3864;    /* Azul institucional: encabezados, navegación, botones primarios */
+  --color-orange: #e8722c;  /* Naranja de acento: llamadas a la acción */
+  --color-success: #2e7d32; /* Verde de estatus: CV completo / Contratado */
+  --color-warning: #f9a825; /* Amarillo de estatus: CV incompleto / En proceso */
+  --color-danger: #c62828;  /* Rojo de estatus: CV crítico / No seleccionado */
+  --color-surface: #f2f2f2; /* Gris de fondo: tarjetas y secciones */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-navy: var(--color-navy);
+  --color-orange: var(--color-orange);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+  --color-surface: var(--color-surface);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }
