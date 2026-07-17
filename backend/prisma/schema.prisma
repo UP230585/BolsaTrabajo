@@ -1,0 +1,253 @@
+// Esquema de base de datos — Sistema de Bolsa de Trabajo UPA
+// Ver capítulo 6 del SDD para el diagrama entidad-relación completo.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Rol {
+  ESTUDIANTE
+  EMPRESA
+  COORDINACION
+}
+
+enum Modalidad {
+  PRESENCIAL
+  HIBRIDO
+  REMOTO
+}
+
+enum EstatusPostulacion {
+  POSTULADO
+  VISTO
+  EN_CONTACTO
+  ENTREVISTA
+  CONTRATADO
+  NO_SELECCIONADO
+}
+
+enum EmisorMensaje {
+  ESTUDIANTE
+  EMPRESA
+}
+
+// ---------------------------------------------------------------------------
+// Usuario base (Épica 3 - Autenticación)
+// ---------------------------------------------------------------------------
+
+model Usuario {
+  id           Int            @id @default(autoincrement())
+  correo       String         @unique
+  password     String
+  rol          Rol
+  activo       Boolean        @default(true)
+  creadoEn     DateTime       @default(now())
+
+  estudiante   Estudiante?
+  empresa      Empresa?
+  notificaciones Notificacion[]
+
+  @@map("usuarios")
+}
+
+// ---------------------------------------------------------------------------
+// Catálogo de carreras (9 carreras de la UPA)
+// ---------------------------------------------------------------------------
+
+model Carrera {
+  id          Int          @id @default(autoincrement())
+  nombre      String
+  clave       String       @unique
+
+  estudiantes Estudiante[]
+  vacantes    Vacante[]
+
+  @@map("carreras")
+}
+
+// ---------------------------------------------------------------------------
+// Estudiante (Épica 4)
+// ---------------------------------------------------------------------------
+
+model Estudiante {
+  id              Int       @id @default(autoincrement())
+  usuarioId       Int       @unique
+  matricula       String    @unique
+  carreraId       Int
+  cuatrimestre    Int
+  fotoUrl         String?
+  porcentajeCV    Int       @default(0)
+
+  usuario         Usuario        @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  carrera         Carrera        @relation(fields: [carreraId], references: [id])
+  cv              CV?
+  postulaciones   Postulacion[]
+  insignias       EstudianteInsignia[]
+  conversaciones  Conversacion[]
+
+  @@map("estudiantes")
+}
+
+model CV {
+  id                   Int       @id @default(autoincrement())
+  estudianteId         Int       @unique
+  archivoUrl           String
+  datosPersonales      Boolean   @default(false)
+  formacionAcademica   Boolean   @default(false)
+  experienciaLaboral   Boolean   @default(false)
+  habilidadesTecnicas  Boolean   @default(false)
+  idiomas              Boolean   @default(false)
+  fotoPerfil           Boolean   @default(false)
+  porcentaje           Int       @default(0)
+  actualizadoEn        DateTime  @updatedAt
+
+  estudiante           Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+
+  @@map("cvs")
+}
+
+// ---------------------------------------------------------------------------
+// Empresa (Épica 5)
+// ---------------------------------------------------------------------------
+
+model Empresa {
+  id           Int       @id @default(autoincrement())
+  usuarioId    Int       @unique
+  razonSocial  String
+  rfc          String    @unique
+  giro         String
+  aprobada     Boolean   @default(false)
+
+  usuario      Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  vacantes     Vacante[]
+  conversaciones Conversacion[]
+
+  @@map("empresas")
+}
+
+// ---------------------------------------------------------------------------
+// Vacante (Épica 6)
+// ---------------------------------------------------------------------------
+
+model Vacante {
+  id              Int       @id @default(autoincrement())
+  titulo          String
+  descripcion     String    @db.Text
+  empresaId       Int
+  carreraId       Int
+  cuatrimestreMin Int
+  modalidad       Modalidad @default(PRESENCIAL)
+  salario         Decimal?  @db.Decimal(10, 2)
+  activa          Boolean   @default(true)
+  aprobada        Boolean   @default(false)
+  creadaEn        DateTime  @default(now())
+
+  empresa         Empresa       @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  carrera         Carrera       @relation(fields: [carreraId], references: [id])
+  postulaciones   Postulacion[]
+
+  @@map("vacantes")
+}
+
+// ---------------------------------------------------------------------------
+// Postulación (Épica 7)
+// ---------------------------------------------------------------------------
+
+model Postulacion {
+  id             Int                 @id @default(autoincrement())
+  estudianteId   Int
+  vacanteId      Int
+  estatus        EstatusPostulacion  @default(POSTULADO)
+  creadaEn       DateTime            @default(now())
+  actualizadaEn  DateTime            @updatedAt
+
+  estudiante     Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  vacante        Vacante    @relation(fields: [vacanteId], references: [id], onDelete: Cascade)
+
+  @@unique([estudianteId, vacanteId])
+  @@map("postulaciones")
+}
+
+// ---------------------------------------------------------------------------
+// Chat (Épica 8)
+// ---------------------------------------------------------------------------
+
+model Conversacion {
+  id            Int        @id @default(autoincrement())
+  estudianteId  Int
+  empresaId     Int
+  creadaEn      DateTime   @default(now())
+
+  estudiante    Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  empresa       Empresa    @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  mensajes      Mensaje[]
+
+  @@unique([estudianteId, empresaId])
+  @@map("conversaciones")
+}
+
+model Mensaje {
+  id              Int           @id @default(autoincrement())
+  conversacionId  Int
+  emisorRol       EmisorMensaje
+  contenido       String        @db.Text
+  enviadoEn       DateTime      @default(now())
+
+  conversacion    Conversacion  @relation(fields: [conversacionId], references: [id], onDelete: Cascade)
+
+  @@map("mensajes")
+}
+
+// ---------------------------------------------------------------------------
+// Insignias (gamificación del dashboard del estudiante)
+// ---------------------------------------------------------------------------
+
+model Insignia {
+  id          Int    @id @default(autoincrement())
+  nombre      String
+  descripcion String
+  icono       String
+
+  estudiantes EstudianteInsignia[]
+
+  @@map("insignias")
+}
+
+model EstudianteInsignia {
+  id            Int      @id @default(autoincrement())
+  estudianteId  Int
+  insigniaId    Int
+  obtenidaEn    DateTime @default(now())
+
+  estudiante    Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  insignia      Insignia   @relation(fields: [insigniaId], references: [id], onDelete: Cascade)
+
+  @@unique([estudianteId, insigniaId])
+  @@map("estudiante_insignias")
+}
+
+// ---------------------------------------------------------------------------
+// Notificaciones (motor de coincidencia)
+// ---------------------------------------------------------------------------
+
+model Notificacion {
+  id         Int      @id @default(autoincrement())
+  usuarioId  Int
+  tipo       String
+  mensaje    String
+  leida      Boolean  @default(false)
+  creadaEn   DateTime @default(now())
+
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("notificaciones")
+}
