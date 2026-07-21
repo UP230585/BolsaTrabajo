@@ -50,7 +50,7 @@ export default function RegistroEstudiantePage() {
     <div className="flex flex-1 items-center justify-center bg-surface px-6 py-16">
       <div className="w-full max-w-md rounded-lg bg-white border border-black/10 p-8 shadow-sm">
         <h1 className="text-2xl font-semibold text-navy mb-1">Registro de estudiante</h1>
-        <p className="text-sm text-black/60 mb-6">Usa tu correo institucional (@upa.edu.mx).</p>
+        <p className="text-sm text-black/60 mb-6">Usa tu correo institucional (@alumnos.upa.edu.mx).</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -61,7 +61,7 @@ export default function RegistroEstudiantePage() {
               value={form.correo}
               onChange={(e) => setForm({ ...form, correo: e.target.value })}
               className="w-full rounded-md border border-black/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-navy"
-              placeholder="tucorreo@upa.edu.mx"
+              placeholder="tucorreo@alumnos.upa.edu.mx"
             />
           </div>
 

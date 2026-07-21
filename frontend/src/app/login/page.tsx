@@ -45,7 +45,7 @@ export default function LoginPage() {
               value={correo}
               onChange={(e) => setCorreo(e.target.value)}
               className="w-full rounded-md border border-black/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-navy"
-              placeholder="tucorreo@upa.edu.mx"
+              placeholder="tucorreo@alumnos.upa.edu.mx"
             />
           </div>
 
