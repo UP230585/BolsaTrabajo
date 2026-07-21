@@ -10,9 +10,13 @@ export const estudianteRepository = {
   },
 
   actualizarPerfil(estudianteId: number, datos: ActualizarPerfilDTO) {
+    const { cuatrimestre, fotoUrl } = datos;
     return prisma.estudiante.update({
       where: { id: estudianteId },
-      data: datos,
+      data: {
+        ...(cuatrimestre !== undefined ? { cuatrimestre } : {}),
+        ...(fotoUrl !== undefined ? { fotoUrl } : {}),
+      },
     });
   },
 
@@ -32,7 +36,7 @@ export const estudianteRepository = {
   },
 
   otorgarInsigniaSiNoExiste(estudianteId: number, nombreInsignia: string) {
-    return prisma.$transaction(async (tx: typeof prisma) => {
+    return prisma.$transaction(async (tx) => {
       const insignia = await tx.insignia.findFirst({ where: { nombre: nombreInsignia } });
       if (!insignia) return null;
 
