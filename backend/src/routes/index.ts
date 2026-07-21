@@ -3,10 +3,18 @@ import { authRouter } from "./auth.routes";
 import { healthRouter } from "./health.routes";
 import { carreraRouter } from "./carrera.routes";
 import { vacanteRouter } from "./vacante.routes";
- 
+import { estudianteRouter } from "./estudiante.routes";
+import { postulacionRouter } from "./postulacion.routes";
+
 export const apiRouter = Router();
- 
+
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/", healthRouter);
 apiRouter.use("/carreras", carreraRouter);
 apiRouter.use("/jobs", vacanteRouter);
+apiRouter.use("/students", estudianteRouter);
+apiRouter.use("/applications", postulacionRouter);
+
+// A partir de la Semana 3 se agregan aquí:
+// apiRouter.use("/chat", chatRouter);
+// apiRouter.use("/admin", adminRouter);
