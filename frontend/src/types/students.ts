@@ -22,6 +22,16 @@ export interface PerfilEstudiante {
   insignias: { insignia: { nombre: string; icono: string } }[];
 }
 
+export interface DetalleAnalisisCv {
+  seccion: string;
+  encontrado: boolean;
+  evidencia: string | null;
+}
+
+export interface ResultadoAnalisisCv extends CV {
+  detalles: DetalleAnalisisCv[];
+}
+
 export interface ActualizarCvInput {
   archivoUrl: string;
   datosPersonales: boolean;
