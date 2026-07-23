@@ -1,18 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { misPostulacionesRequest } from "@/services/applications.service";
+import { iniciarConversacionRequest } from "@/services/chat.service";
 import { COLUMNAS_KANBAN, type Postulacion } from "@/types/applications";
 
 export default function StudentApplicationsPage() {
+  const router = useRouter();
   const [postulaciones, setPostulaciones] = useState<Postulacion[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [abriendoChatId, setAbriendoChatId] = useState<number | null>(null);
 
   useEffect(() => {
     misPostulacionesRequest()
       .then(setPostulaciones)
       .finally(() => setCargando(false));
   }, []);
+
+  async function handleAbrirChat(vacanteId: number) {
+    setAbriendoChatId(vacanteId);
+    try {
+      const conversacion = await iniciarConversacionRequest(vacanteId);
+      router.push(`/chat/${conversacion.id}`);
+    } finally {
+      setAbriendoChatId(null);
+    }
+  }
 
   if (cargando) {
     return <p className="text-center py-16 text-black/60">Cargando tus postulaciones...</p>;
@@ -43,6 +57,13 @@ export default function StudentApplicationsPage() {
                       <p className="text-[10px] text-black/40 mt-1">
                         {new Date(p.creadaEn).toLocaleDateString("es-MX")}
                       </p>
+                      <button
+                        onClick={() => handleAbrirChat(p.vacante.id)}
+                        disabled={abriendoChatId === p.vacante.id}
+                        className="mt-2 text-xs text-orange font-medium hover:underline disabled:opacity-50"
+                      >
+                        {abriendoChatId === p.vacante.id ? "Abriendo..." : "Chatear con la empresa →"}
+                      </button>
                     </div>
                   ))}
                 </div>

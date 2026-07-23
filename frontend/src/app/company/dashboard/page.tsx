@@ -40,12 +40,20 @@ export default function CompanyDashboardPage() {
             {vacantes.length} vacante(s) · {postulaciones.length} postulación(es) recibida(s)
           </p>
         </div>
-        <Link
-          href="/company/jobs/new"
-          className="rounded-md bg-orange px-5 py-2.5 font-medium text-white hover:opacity-90 transition-opacity"
-        >
-          Publicar vacante
-        </Link>
+        <div className="flex gap-3">
+          <Link
+            href="/chat"
+            className="rounded-md border border-navy px-5 py-2.5 font-medium text-navy hover:bg-surface transition-colors"
+          >
+            Mensajes
+          </Link>
+          <Link
+            href="/company/jobs/new"
+            className="rounded-md bg-orange px-5 py-2.5 font-medium text-white hover:opacity-90 transition-opacity"
+          >
+            Publicar vacante
+          </Link>
+        </div>
       </div>
 
       <h2 className="font-semibold text-navy mb-3">Mis vacantes</h2>

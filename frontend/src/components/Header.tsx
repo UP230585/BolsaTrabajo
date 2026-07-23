@@ -28,11 +28,24 @@ export function Header() {
               <Link href="/student/applications" className="hover:text-orange transition-colors">
                 Mis postulaciones
               </Link>
+              <Link href="/chat" className="hover:text-orange transition-colors">
+                Mensajes
+              </Link>
             </>
           )}
           {usuario?.rol === "EMPRESA" && (
-            <Link href="/company/dashboard" className="hover:text-orange transition-colors">
-              Mi empresa
+            <>
+              <Link href="/company/dashboard" className="hover:text-orange transition-colors">
+                Mi empresa
+              </Link>
+              <Link href="/chat" className="hover:text-orange transition-colors">
+                Mensajes
+              </Link>
+            </>
+          )}
+          {usuario?.rol === "COORDINACION" && (
+            <Link href="/admin" className="hover:text-orange transition-colors">
+              Administración
             </Link>
           )}
         </nav>
