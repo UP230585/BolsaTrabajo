@@ -26,12 +26,7 @@ export const estudianteController = {
     if (!req.file) {
       throw new AppError("No se recibió ningún archivo PDF", 400);
     }
-    const urlPublica = `/uploads/cv/${req.file.filename}`;
-    const cv = await estudianteService.analizarYGuardarCv(
-      req.usuario!.userId,
-      req.file.path,
-      urlPublica
-    );
+    const cv = await estudianteService.analizarYGuardarCv(req.usuario!.userId, req.file.buffer);
     res.status(200).json({ data: cv, error: null });
   },
 };

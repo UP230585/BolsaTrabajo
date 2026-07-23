@@ -1,8 +1,8 @@
 import { estudianteRepository } from "../repositories/estudiante.repository";
 import { cvAnalyzerService } from "./cv-analyzer.service";
+import { storageService } from "./storage.service";
 import { AppError } from "../middlewares/error.middleware";
 import type { ActualizarCvDTO, ActualizarPerfilDTO } from "../dtos/estudiante.dto";
-import fs from "node:fs/promises";
 
 const CAMPOS_CV = [
   "datosPersonales",
@@ -49,16 +49,15 @@ export const estudianteService = {
 
   /**
    * Analiza automáticamente el PDF subido (HU-02) y guarda el resultado.
-   * A diferencia de actualizarCv, aquí el estudiante no marca nada a mano:
-   * el sistema detecta qué secciones trae el documento.
+   * Recibe el archivo en memoria: primero lo analiza, y solo si el PDF es
+   * legible lo guarda (en Azure Blob o en disco, según la configuración).
    */
-  async analizarYGuardarCv(usuarioId: number, rutaArchivo: string, urlPublica: string) {
+  async analizarYGuardarCv(usuarioId: number, bufferPdf: Buffer) {
     const estudiante = await this.obtenerPerfil(usuarioId);
 
     let analisis;
     try {
-      const buffer = await fs.readFile(rutaArchivo);
-      analisis = await cvAnalyzerService.analizar(buffer);
+      analisis = await cvAnalyzerService.analizar(bufferPdf);
     } catch {
       throw new AppError(
         "No se pudo leer el PDF. Verifica que no esté dañado ni protegido con contraseña.",
@@ -66,10 +65,12 @@ export const estudianteService = {
       );
     }
 
+    const { url } = await storageService.guardarCv(`cv-${estudiante.id}.pdf`, bufferPdf);
+
     const cv = await estudianteRepository.upsertCv(
       estudiante.id,
       {
-        archivoUrl: urlPublica,
+        archivoUrl: url,
         datosPersonales: analisis.datosPersonales,
         formacionAcademica: analisis.formacionAcademica,
         experienciaLaboral: analisis.experienciaLaboral,
