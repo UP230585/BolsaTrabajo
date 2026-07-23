@@ -1,8 +1,9 @@
 import { z } from "zod";
 
 // El correo de estudiante debe ser institucional (HU-01, criterio de aceptación).
-const correoEstudianteSchema = z.string().email().refine((correo) => correo.endsWith("@upa.edu.mx"), {
-  message: "El correo de estudiante debe ser institucional (@upa.edu.mx)",
+// Dominio real de la UPA para alumnos: @alumnos.upa.edu.mx
+const correoEstudianteSchema = z.string().email().refine((correo) => correo.endsWith("@alumnos.upa.edu.mx"), {
+  message: "El correo de estudiante debe ser institucional (@alumnos.upa.edu.mx)",
 });
 
 export const registrarEstudianteSchema = z.object({
