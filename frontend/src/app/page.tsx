@@ -29,9 +29,7 @@ export default function HomePage() {
           </div>
           <div className="flex-1 w-full max-w-md rounded-lg bg-white/5 border border-white/10 p-6">
             <p className="text-sm text-white/70">
-              Vista previa: pantallas completas (Dashboard, Validador de CV,
-              Explorador de Vacantes, Kanban) se conectan aquí a partir de la
-              Semana 2, cuando el backend de autenticación y vacantes esté listo.
+              Aqui vamos a poner algo
             </p>
           </div>
         </div>
