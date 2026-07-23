@@ -5,6 +5,8 @@ import { carreraRouter } from "./carrera.routes";
 import { vacanteRouter } from "./vacante.routes";
 import { estudianteRouter } from "./estudiante.routes";
 import { postulacionRouter } from "./postulacion.routes";
+import { chatRouter } from "./chat.routes";
+import { adminRouter } from "./admin.routes";
 
 export const apiRouter = Router();
 
@@ -14,7 +16,5 @@ apiRouter.use("/carreras", carreraRouter);
 apiRouter.use("/jobs", vacanteRouter);
 apiRouter.use("/students", estudianteRouter);
 apiRouter.use("/applications", postulacionRouter);
-
-// A partir de la Semana 3 se agregan aquí:
-// apiRouter.use("/chat", chatRouter);
-// apiRouter.use("/admin", adminRouter);
+apiRouter.use("/chat", chatRouter);
+apiRouter.use("/admin", adminRouter);
