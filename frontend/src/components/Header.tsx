@@ -1,7 +1,28 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+
+// Resalta el enlace de la página en la que está el usuario (indicador de
+// "dónde estoy" pedido explícitamente para la evaluación).
+function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+  const pathname = usePathname();
+  const activo = href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+
+  return (
+    <Link
+      href={href}
+      aria-current={activo ? "page" : undefined}
+      className={`relative pb-1 transition-colors ${
+        activo ? "text-orange font-semibold" : "hover:text-orange"
+      }`}
+    >
+      {children}
+      {activo && <span className="absolute left-0 right-0 -bottom-1 h-0.5 bg-orange rounded-full" />}
+    </Link>
+  );
+}
 
 export function Header() {
   const { usuario, logout } = useAuth();
@@ -14,15 +35,22 @@ export function Header() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 text-sm">
-          <Link href="/" className="hover:text-orange transition-colors">
-            Inicio
-          </Link>
-          <Link href="/jobs" className="hover:text-orange transition-colors">
-            Vacantes
-          </Link>
-          <Link href="/empresas" className="hover:text-orange transition-colors">
-            Empresas
-          </Link>
+          <NavLink href="/">Inicio</NavLink>
+          <NavLink href="/jobs">Vacantes</NavLink>
+          {usuario?.rol === "ESTUDIANTE" && (
+            <>
+              <NavLink href="/student/dashboard">Mi dashboard</NavLink>
+              <NavLink href="/student/applications">Mis postulaciones</NavLink>
+              <NavLink href="/chat">Mensajes</NavLink>
+            </>
+          )}
+          {usuario?.rol === "EMPRESA" && (
+            <>
+              <NavLink href="/company/dashboard">Mi empresa</NavLink>
+              <NavLink href="/chat">Mensajes</NavLink>
+            </>
+          )}
+          {usuario?.rol === "COORDINACION" && <NavLink href="/admin">Administración</NavLink>}
         </nav>
 
         {usuario ? (
