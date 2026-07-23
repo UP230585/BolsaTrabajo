@@ -6,9 +6,14 @@ import { miPerfilRequest, analizarCvRequest } from "@/services/students.service"
 import type { PerfilEstudiante, DetalleAnalisisCv } from "@/types/students";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
-// La URL del archivo viene como /uploads/cv/... y se sirve desde la raíz del
-// backend, no desde /api/v1, por eso se recorta ese sufijo.
+// La URL del CV puede venir de dos formas segun donde este guardado:
+//  - Azure Blob Storage: URL absoluta (https://...blob.core.windows.net/...)
+//  - Disco local: ruta relativa (/uploads/cv/...) servida por el backend
 const SERVIDOR_ARCHIVOS = API_BASE.replace(/\/api\/v1\/?$/, "");
+
+function urlCompletaDelCv(archivoUrl: string): string {
+  return archivoUrl.startsWith("http") ? archivoUrl : `${SERVIDOR_ARCHIVOS}${archivoUrl}`;
+}
 
 // Secciones mostradas cuando aún no se ha analizado ningún CV.
 const SECCIONES_BASE = [
@@ -144,7 +149,7 @@ export default function StudentProfilePage() {
             <div className="mt-4">
               <p className="text-xs text-black/50 mb-2">Vista previa</p>
               <iframe
-                src={`${SERVIDOR_ARCHIVOS}${archivoUrl}`}
+                src={urlCompletaDelCv(archivoUrl)}
                 title="Vista previa del CV"
                 className="w-full h-72 rounded border border-black/10"
               />

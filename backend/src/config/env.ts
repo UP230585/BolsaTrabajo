@@ -15,4 +15,7 @@ export const env = {
   jwtSecret: required("JWT_SECRET"),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
   corsOrigin: process.env.CORS_ORIGIN ?? "http://localhost:3000",
+  // Opcionales: si no existen, los archivos se guardan en disco local.
+  azureStorageConnectionString: process.env.AZURE_STORAGE_CONNECTION_STRING,
+  azureStorageContainer: process.env.AZURE_STORAGE_CONTAINER ?? "cvs",
 };

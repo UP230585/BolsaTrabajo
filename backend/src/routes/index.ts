@@ -6,6 +6,7 @@ import { vacanteRouter } from "./vacante.routes";
 import { estudianteRouter } from "./estudiante.routes";
 import { postulacionRouter } from "./postulacion.routes";
 import { chatRouter } from "./chat.routes";
+import { adminRouter } from "./admin.routes";
 
 export const apiRouter = Router();
 
@@ -16,6 +17,4 @@ apiRouter.use("/jobs", vacanteRouter);
 apiRouter.use("/students", estudianteRouter);
 apiRouter.use("/applications", postulacionRouter);
 apiRouter.use("/chat", chatRouter);
-
-// julieta agrega aquí en su rama:
-// apiRouter.use("/admin", adminRouter);
+apiRouter.use("/admin", adminRouter);
