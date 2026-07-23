@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
+import { MulterError } from "multer";
 
 export class AppError extends Error {
   status: number;
@@ -18,6 +19,14 @@ export function errorHandler(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction
 ) {
+  if (err instanceof MulterError) {
+    const mensaje =
+      err.code === "LIMIT_FILE_SIZE"
+        ? "El archivo supera el tamaño máximo permitido (5 MB)"
+        : "Error al subir el archivo";
+    return res.status(400).json({ data: null, error: mensaje });
+  }
+
   if (err instanceof ZodError) {
     return res.status(400).json({
       data: null,

@@ -141,3 +141,7 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# CVs subidos por los estudiantes (no deben versionarse: son datos personales)
+backend/uploads/cv/*
+!backend/uploads/cv/.gitkeep
