@@ -11,8 +11,8 @@ async function perfilDelUsuario(userId: number): Promise<{ estudianteId?: number
     throw new AppError("Usuario no encontrado", 404);
   }
   return {
-    estudianteId: usuario.estudiante?.id,
-    empresaId: usuario.empresa?.id,
+    ...(usuario.estudiante ? { estudianteId: usuario.estudiante.id } : {}),
+    ...(usuario.empresa ? { empresaId: usuario.empresa.id } : {}),
     rol: usuario.rol,
   };
 }
