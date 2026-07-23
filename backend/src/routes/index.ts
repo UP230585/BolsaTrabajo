@@ -5,6 +5,7 @@ import { carreraRouter } from "./carrera.routes";
 import { vacanteRouter } from "./vacante.routes";
 import { estudianteRouter } from "./estudiante.routes";
 import { postulacionRouter } from "./postulacion.routes";
+import { chatRouter } from "./chat.routes";
 
 export const apiRouter = Router();
 
@@ -14,7 +15,7 @@ apiRouter.use("/carreras", carreraRouter);
 apiRouter.use("/jobs", vacanteRouter);
 apiRouter.use("/students", estudianteRouter);
 apiRouter.use("/applications", postulacionRouter);
+apiRouter.use("/chat", chatRouter);
 
-// A partir de la Semana 3 se agregan aquí:
-// apiRouter.use("/chat", chatRouter);
+// julieta agrega aquí en su rama:
 // apiRouter.use("/admin", adminRouter);
