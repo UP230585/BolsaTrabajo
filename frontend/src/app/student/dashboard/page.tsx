@@ -1,0 +1,79 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Semaforo } from "@/components/Semaforo";
+import { miPerfilRequest } from "@/services/students.service";
+import { useAuth } from "@/context/AuthContext";
+import type { PerfilEstudiante } from "@/types/students";
+
+export default function StudentDashboardPage() {
+  const { usuario } = useAuth();
+  const [perfil, setPerfil] = useState<PerfilEstudiante | null>(null);
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    miPerfilRequest()
+      .then(setPerfil)
+      .finally(() => setCargando(false));
+  }, []);
+
+  if (cargando) {
+    return <p className="text-center py-16 text-black/60">Cargando tu dashboard...</p>;
+  }
+
+  if (!perfil) {
+    return <p className="text-center py-16 text-black/60">No se pudo cargar tu perfil.</p>;
+  }
+
+  return (
+    <div className="mx-auto max-w-5xl w-full px-6 py-10">
+      <h1 className="text-2xl font-semibold text-navy mb-1">
+        Hola, {usuario?.correo.split("@")[0]} 👋
+      </h1>
+      <p className="text-black/60 mb-8">
+        {perfil.carrera.nombre} · {perfil.cuatrimestre}° cuatrimestre
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="rounded-lg border border-black/10 bg-white p-6 flex flex-col items-center text-center gap-3">
+          <Semaforo porcentaje={perfil.porcentajeCV} />
+          <p className="text-sm text-black/60">
+            {perfil.porcentajeCV >= 100
+              ? "¡Tu perfil está completo!"
+              : "Completa tu CV para que las empresas te vean."}
+          </p>
+          <Link href="/student/profile" className="text-orange text-sm font-medium hover:underline">
+            Completar perfil →
+          </Link>
+        </div>
+
+        <div className="rounded-lg border border-black/10 bg-white p-6">
+          <h2 className="font-semibold text-navy mb-3">Insignias</h2>
+          {perfil.insignias.length === 0 ? (
+            <p className="text-sm text-black/60">Aún no tienes insignias.</p>
+          ) : (
+            <ul className="space-y-2">
+              {perfil.insignias.map((ei) => (
+                <li key={ei.insignia.nombre} className="text-sm flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-orange" />
+                  {ei.insignia.nombre}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="rounded-lg border border-black/10 bg-white p-6 flex flex-col gap-3">
+          <h2 className="font-semibold text-navy">Accesos rápidos</h2>
+          <Link href="/jobs" className="text-orange text-sm font-medium hover:underline">
+            Ver vacantes recomendadas →
+          </Link>
+          <Link href="/student/applications" className="text-orange text-sm font-medium hover:underline">
+            Ver mis postulaciones →
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

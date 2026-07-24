@@ -1,0 +1,74 @@
+name: Deploy to Azure
+
+# Este workflow se activa cuando "Continuous Integration" (ci.yml) termina
+# exitosamente sobre la rama main, y también se puede correr manualmente.
+# Requisito previo: haber ejecutado infra/azure-setup.sh (o creado los recursos
+# manualmente en el portal de Azure) y haber configurado los Secrets del
+# repositorio (Settings → Secrets and variables → Actions):
+#   AZURE_WEBAPP_PUBLISH_PROFILE    -> perfil de publicación del App Service (backend)
+#   AZURE_STATIC_WEB_APPS_API_TOKEN -> token de despliegue de la Static Web App (frontend)
+#   NEXT_PUBLIC_API_URL             -> URL pública del backend + /api/v1, ej:
+#                                      https://bolsa-trabajo-upa-api-isc08c.azurewebsites.net/api/v1
+#                                      (el frontend ahora se exporta como sitio
+#                                      estático, así que esta URL se "hornea"
+#                                      dentro del código en tiempo de build, no
+#                                      se puede cambiar después solo en Azure)
+
+on:
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy-backend:
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalar y compilar backend
+        working-directory: backend
+        run: |
+          npm install
+          npm run build
+
+      - name: Desplegar en Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: bolsa-trabajo-upa-api-isc08c
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: backend
+
+  deploy-frontend:
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalar y compilar frontend (exportación estática)
+        working-directory: frontend
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+        run: |
+          npm install
+          npm run build
+
+      - name: Desplegar en Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "frontend/out"
+          output_location: ""
+          skip_app_build: true
