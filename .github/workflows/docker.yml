@@ -1,0 +1,76 @@
+name: Build Docker Images
+
+# Se activa con cada cambio en qa (después de que el PR ya se mergeó), para
+# mantener siempre una imagen de Docker actualizada que refleje el estado
+# real de esa rama. También se puede correr manualmente desde la pestaña
+# Actions con "Run workflow".
+#
+# Las imágenes se publican en GitHub Container Registry (ghcr.io), que no
+# necesita ningún secret adicional: usa el GITHUB_TOKEN que ya existe
+# automáticamente en cada repositorio.
+
+on:
+  push:
+    branches:
+      - qa
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Normalizar nombre del repositorio a minusculas
+        run: echo "REPO_LOWER=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - name: Iniciar sesión en GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Construir y publicar imagen del backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}/backend:qa
+            ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}/backend:${{ github.sha }}
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Normalizar nombre del repositorio a minusculas
+        run: echo "REPO_LOWER=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - name: Iniciar sesión en GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Construir y publicar imagen del frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}/frontend:qa
+            ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}/frontend:${{ github.sha }}
