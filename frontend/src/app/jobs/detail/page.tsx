@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { obtenerVacanteRequest } from "@/services/jobs.service";
 import { postularseRequest } from "@/services/applications.service";
 import { useAuth } from "@/context/AuthContext";
@@ -14,7 +14,20 @@ const ETIQUETA_MODALIDAD: Record<Vacante["modalidad"], string> = {
 };
 
 export default function JobDetailPage() {
-  const params = useParams<{ id: string }>();
+  return (
+    <Suspense fallback={<p className="text-center py-16 text-black/60">Cargando vacante...</p>}>
+      <JobDetailContent />
+    </Suspense>
+  );
+}
+
+function JobDetailContent() {
+  // Se usa un query param (?id=) en vez de una ruta dinámica ([id]) porque
+  // el proyecto se exporta como sitio estático para Azure Static Web Apps,
+  // que no ejecuta código de servidor: un query param sigue siendo la misma
+  // página HTML pre-generada, y el id se lee ya en el navegador.
+  const searchParams = useSearchParams();
+  const id = Number(searchParams.get("id"));
   const { usuario } = useAuth();
 
   const [vacante, setVacante] = useState<Vacante | null>(null);
@@ -23,16 +36,16 @@ export default function JobDetailPage() {
   const [mensaje, setMensaje] = useState<string | null>(null);
 
   useEffect(() => {
-    obtenerVacanteRequest(Number(params.id))
+    obtenerVacanteRequest(id)
       .then(setVacante)
       .finally(() => setCargando(false));
-  }, [params.id]);
+  }, [id]);
 
   async function handlePostularme() {
     setPostulando(true);
     setMensaje(null);
     try {
-      await postularseRequest(Number(params.id));
+      await postularseRequest(id);
       setMensaje("¡Postulación enviada! Revisa el estatus en tu panel Kanban.");
     } catch {
       setMensaje("No se pudo completar la postulación (puede que ya te hayas postulado).");

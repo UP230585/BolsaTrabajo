@@ -10,7 +10,7 @@ const ETIQUETA_MODALIDAD: Record<Vacante["modalidad"], string> = {
 export function JobCard({ vacante }: { vacante: Vacante }) {
   return (
     <Link
-      href={`/jobs/${vacante.id}`}
+      href={`/jobs/detail?id=${vacante.id}`}
       className="block rounded-lg border border-black/10 p-5 hover:border-navy transition-colors bg-white"
     >
       <div className="flex items-start justify-between gap-2">
