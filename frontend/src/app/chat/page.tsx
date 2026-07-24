@@ -40,7 +40,7 @@ export default function ChatListPage() {
             return (
               <Link
                 key={c.id}
-                href={`/chat/${c.id}`}
+                href={`/chat/conversation?id=${c.id}`}
                 className="flex items-center justify-between px-5 py-4 hover:bg-surface transition-colors"
               >
                 <div>

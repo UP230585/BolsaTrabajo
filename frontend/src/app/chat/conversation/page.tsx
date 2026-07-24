@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useRef, useState, Suspense, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { obtenerMensajesRequest, enviarMensajeRequest } from "@/services/chat.service";
 import { useAuth } from "@/context/AuthContext";
 import type { Mensaje } from "@/types/chat";
@@ -9,8 +9,19 @@ import type { Mensaje } from "@/types/chat";
 const INTERVALO_POLLING_MS = 4000;
 
 export default function ChatConversationPage() {
-  const params = useParams<{ conversationId: string }>();
-  const conversacionId = Number(params.conversationId);
+  return (
+    <Suspense fallback={<p className="text-center py-16 text-black/60">Cargando conversación...</p>}>
+      <ChatConversationContent />
+    </Suspense>
+  );
+}
+
+function ChatConversationContent() {
+  // Se usa un query param (?id=) en vez de una ruta dinámica ([conversationId])
+  // porque el proyecto se exporta como sitio estático para Azure Static Web
+  // Apps, que no ejecuta código de servidor.
+  const searchParams = useSearchParams();
+  const conversacionId = Number(searchParams.get("id"));
   const { usuario } = useAuth();
 
   const [mensajes, setMensajes] = useState<Mensaje[]>([]);

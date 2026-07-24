@@ -22,7 +22,7 @@ export default function StudentApplicationsPage() {
     setAbriendoChatId(vacanteId);
     try {
       const conversacion = await iniciarConversacionRequest(vacanteId);
-      router.push(`/chat/${conversacion.id}`);
+      router.push(`/chat/conversation?id=${conversacion.id}`);
     } finally {
       setAbriendoChatId(null);
     }
