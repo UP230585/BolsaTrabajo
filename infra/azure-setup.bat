@@ -18,14 +18,15 @@ REM ===========================================================================
 REM --- EDITA ESTAS VARIABLES ANTES DE CORRER ---------------------------------
 set SUFIJO=isc08c
 set RESOURCE_GROUP=rg-bolsa-trabajo-upa
-set LOCATION=centralus
-set APP_SERVICE_PLAN=plan-bolsa-trabajo-upa
+set RG_LOCATION=eastus2
+set LOCATION=eastus
+set APP_SERVICE_PLAN=plan-bolsa-trabajo-upa-eus
 set BACKEND_APP_NAME=bolsa-trabajo-upa-api-%SUFIJO%
 set STATIC_WEB_APP_NAME=bolsa-trabajo-upa-web-%SUFIJO%
-set MYSQL_SERVER_NAME=mysql-bolsa-upa-%SUFIJO%
-set STORAGE_ACCOUNT=stbolsaupa%SUFIJO%
+set MYSQL_SERVER_NAME=mysql-bolsa-upa-isc08c-1
+set STORAGE_ACCOUNT=stbolsaupaisc08c
 set MYSQL_ADMIN_USER=upaadmin
-set MYSQL_ADMIN_PASSWORD=CambiaEstaPassword2026!
+set MYSQL_ADMIN_PASSWORD=*Ohlqsltc24*
 set MYSQL_DB_NAME=bolsa_trabajo_upa
 REM ---------------------------------------------------------------------------
 
@@ -33,14 +34,14 @@ echo.
 echo ==========================================================
 echo  1/7 Creando grupo de recursos: %RESOURCE_GROUP%
 echo ==========================================================
-call az group create --name %RESOURCE_GROUP% --location %LOCATION%
+call az group create --name %RESOURCE_GROUP% --location %RG_LOCATION%
 if errorlevel 1 goto :error
 
 echo.
 echo ==========================================================
-echo  2/7 Creando App Service Plan (Linux, capa gratuita F1)
+echo  2/7 Creando App Service Plan (Linux, capa Basic B1)
 echo ==========================================================
-call az appservice plan create --name %APP_SERVICE_PLAN% --resource-group %RESOURCE_GROUP% --is-linux --sku F1
+call az appservice plan create --name %APP_SERVICE_PLAN% --resource-group %RESOURCE_GROUP% --location %LOCATION% --is-linux --sku B1
 if errorlevel 1 goto :error
 
 echo.
@@ -52,10 +53,14 @@ if errorlevel 1 goto :error
 
 echo.
 echo ==========================================================
-echo  4/7 Creando Azure Database for MySQL (esto tarda varios minutos)
+echo  4/7 MySQL ya fue creado manualmente (mysql-bolsa-upa-isc08c-1)
+echo      Saltando este paso.
 echo ==========================================================
-call az mysql flexible-server create --name %MYSQL_SERVER_NAME% --resource-group %RESOURCE_GROUP% --location %LOCATION% --admin-user %MYSQL_ADMIN_USER% --admin-password %MYSQL_ADMIN_PASSWORD% --sku-name Standard_B1ms --tier Burstable --version 8.0 --database-name %MYSQL_DB_NAME% --public-access 0.0.0.0 --yes
-if errorlevel 1 goto :error
+REM Este servidor ya se creo a mano el 23/jul/2026 porque eastus2 no
+REM soportaba MySQL para esta suscripcion. Si necesitas recrearlo desde
+REM cero, descomenta las 2 lineas de abajo:
+REM call az mysql flexible-server create --name %MYSQL_SERVER_NAME% --resource-group %RESOURCE_GROUP% --location %LOCATION% --admin-user %MYSQL_ADMIN_USER% --admin-password %MYSQL_ADMIN_PASSWORD% --sku-name Standard_B1ms --tier Burstable --version 8.0.21 --database-name %MYSQL_DB_NAME% --public-access 0.0.0.0 --yes
+REM if errorlevel 1 goto :error
 
 echo.
 echo ==========================================================
@@ -116,7 +121,7 @@ echo  ERROR: fallo el comando anterior.
 echo  Causas comunes:
 echo    - El nombre ya esta ocupado por otra persona en Azure (cambia SUFIJO)
 echo    - No hiciste "az login"
-echo    - Tu suscripcion no permite esa region (prueba con eastus2)
+echo    - Tu suscripcion no permite esa region (westus2 SI funciona para ti;
 echo ***************************************************************************
 
 :fin
