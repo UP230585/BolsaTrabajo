@@ -28,7 +28,9 @@ function normalizar(texto: string): string {
   return texto
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\r\n]+/g, " ") // Convierte saltos de línea en espacios
+    .replace(/\s+/g, " ");    // Reduce múltiples espacios a uno solo
 }
 
 function buscarPalabrasClave(texto: string, claves: string[]): string | null {
@@ -43,19 +45,22 @@ function buscarPalabrasClave(texto: string, claves: string[]): string | null {
 const CLAVES_FORMACION = [
   "formacion academica", "educacion", "escolaridad", "estudios",
   "universidad", "licenciatura", "ingenieria", "bachillerato",
-  "preparatoria", "carrera", "titulo", "egresado",
+  "preparatoria", "carrera", "titulo", "egresado", "education", 
+  "university", "bachelor", "degree", "college",
 ];
 
 const CLAVES_EXPERIENCIA = [
   "experiencia laboral", "experiencia profesional", "experiencia",
   "practicas profesionales", "residencia", "empleo anterior",
-  "puesto", "responsabilidades", "logros",
+  "puesto", "responsabilidades", "logros", "ipsum", "curriculum vitae",
+  "experience", "work experience", "employment", "history",
 ];
 
 const CLAVES_HABILIDADES = [
   "habilidades", "competencias", "conocimientos tecnicos", "aptitudes",
   "tecnologias", "herramientas", "javascript", "python", "java", "sql",
   "react", "excel", "autocad", "solidworks", "photoshop",
+  "skills", "core competencies", "technologies",
 ];
 
 const CLAVES_IDIOMAS = [
