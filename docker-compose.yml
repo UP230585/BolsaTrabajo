@@ -1,0 +1,52 @@
+# Levanta el proyecto completo en contenedores: MySQL + backend + frontend.
+# Uso:
+#   docker compose up --build
+# El frontend queda en http://localhost:8080, el backend en http://localhost:4000
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: bolsa_trabajo_upa
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot123"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "mysql://root:root123@db:3306/bolsa_trabajo_upa"
+      JWT_SECRET: "secreto-para-desarrollo-local-con-docker"
+      JWT_EXPIRES_IN: "7d"
+      PORT: 4000
+      NODE_ENV: production
+      CORS_ORIGIN: "http://localhost:8080"
+    ports:
+      - "4000:4000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: "http://localhost:4000/api/v1"
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  mysql_data:
