@@ -83,3 +83,31 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}/frontend:qa
             ${{ env.REGISTRY }}/${{ env.REPO_LOWER }}/frontend:${{ github.sha }}
+
+  redeploy:
+    # Una vez publicadas las dos imágenes, reconstruye y reinicia los
+    # contenedores locales con el código nuevo (docker-compose.yml), y deja
+    # la base de datos al día. Esto es lo que hace que el pipeline se sienta
+    # "vivo" en la máquina del equipo, no solo que publique imágenes.
+    needs: [build-backend, build-frontend]
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reiniciar los contenedores con el código nuevo
+        shell: powershell
+        run: |
+          docker compose down
+          docker compose up -d --build --wait
+
+      - name: Instalar dependencias del backend (para correr Prisma)
+        shell: powershell
+        working-directory: backend
+        run: npm ci
+
+      - name: Aplicar migraciones pendientes a la base de datos local
+        shell: powershell
+        working-directory: backend
+        env:
+          DATABASE_URL: "mysql://root:root123@localhost:3307/bolsa_trabajo_upa"
+        run: npx prisma migrate deploy
