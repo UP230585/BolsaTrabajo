@@ -53,6 +53,7 @@ export const adminRepository = {
     return prisma.vacante.update({
       where: { id },
       data: { aprobada },
+      include: { empresa: true },
     });
   },
 

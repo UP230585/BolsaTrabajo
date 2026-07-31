@@ -1,4 +1,5 @@
 import { adminRepository } from "../repositories/admin.repository";
+import { notificacionService } from "./notificacion.service";
 import type { Rol } from "@prisma/client";
 
 export const adminService = {
@@ -14,18 +15,36 @@ export const adminService = {
     return adminRepository.empresasPendientes();
   },
 
-  aprobarEmpresa(id: number, aprobada: boolean) {
-    // En una siguiente iteración aquí se dispararía el correo de notificación
-    // a la empresa (HU-10: "al aprobar/rechazar, la empresa recibe un correo").
-    return adminRepository.aprobarEmpresa(id, aprobada);
+  async aprobarEmpresa(id: number, aprobada: boolean) {
+    const empresa = await adminRepository.aprobarEmpresa(id, aprobada);
+
+    await notificacionService.crear(
+      empresa.usuarioId,
+      "empresa",
+      aprobada
+        ? "Tu empresa fue aprobada por la Coordinación. Ya puedes publicar vacantes."
+        : "Tu empresa fue rechazada por la Coordinación."
+    );
+
+    return empresa;
   },
 
   vacantesPendientes() {
     return adminRepository.vacantesPendientes();
   },
 
-  aprobarVacante(id: number, aprobada: boolean) {
-    return adminRepository.aprobarVacante(id, aprobada);
+  async aprobarVacante(id: number, aprobada: boolean) {
+    const vacante = await adminRepository.aprobarVacante(id, aprobada);
+
+    await notificacionService.crear(
+      vacante.empresa.usuarioId,
+      "vacante",
+      aprobada
+        ? `Tu vacante "${vacante.titulo}" fue aprobada y ya es visible para estudiantes.`
+        : `Tu vacante "${vacante.titulo}" fue rechazada por la Coordinación.`
+    );
+
+    return vacante;
   },
 
   metricas() {

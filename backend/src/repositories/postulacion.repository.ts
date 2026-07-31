@@ -34,7 +34,7 @@ export const postulacionRepository = {
   findById(id: number) {
     return prisma.postulacion.findUnique({
       where: { id },
-      include: { vacante: true },
+      include: { vacante: true, estudiante: true },
     });
   },
 
