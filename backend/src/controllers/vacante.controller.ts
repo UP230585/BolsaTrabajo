@@ -1,6 +1,11 @@
 import type { Request, Response } from "express";
 import { vacanteService } from "../services/vacante.service";
-import { crearVacanteSchema, filtrosVacanteSchema } from "../dtos/vacante.dto";
+import {
+  crearVacanteSchema,
+  filtrosVacanteSchema,
+  actualizarVacanteSchema,
+  cambiarEstadoVacanteSchema,
+} from "../dtos/vacante.dto";
 import { userRepository } from "../repositories/user.repository";
 import { AppError } from "../middlewares/error.middleware";
 
@@ -36,5 +41,21 @@ export const vacanteController = {
     const datos = crearVacanteSchema.parse(req.body);
     const vacante = await vacanteService.crear(empresaId, datos);
     res.status(201).json({ data: vacante, error: null });
+  },
+
+  async actualizar(req: Request, res: Response) {
+    const empresaId = await empresaIdDelUsuarioAutenticado(req.usuario!.userId);
+    const id = Number(req.params.id);
+    const datos = actualizarVacanteSchema.parse(req.body);
+    const vacante = await vacanteService.actualizar(id, empresaId, datos);
+    res.status(200).json({ data: vacante, error: null });
+  },
+
+  async cambiarEstado(req: Request, res: Response) {
+    const empresaId = await empresaIdDelUsuarioAutenticado(req.usuario!.userId);
+    const id = Number(req.params.id);
+    const { activa } = cambiarEstadoVacanteSchema.parse(req.body);
+    const vacante = await vacanteService.cambiarEstado(id, empresaId, activa);
+    res.status(200).json({ data: vacante, error: null });
   },
 };

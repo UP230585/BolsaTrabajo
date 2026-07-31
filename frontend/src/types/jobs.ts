@@ -35,3 +35,12 @@ export interface FiltrosVacantes {
   cuatrimestre?: number;
   modalidad?: Modalidad;
 }
+
+export interface ActualizarVacanteInput {
+  titulo?: string;
+  descripcion?: string;
+  carreraId?: number;
+  cuatrimestreMin?: number;
+  modalidad?: Modalidad;
+  salario?: number;
+}
