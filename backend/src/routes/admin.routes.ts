@@ -14,3 +14,5 @@ adminRouter.patch("/companies/:id/approve", adminController.aprobarEmpresa);
 adminRouter.get("/jobs/pending", adminController.vacantesPendientes);
 adminRouter.patch("/jobs/:id/approve", adminController.aprobarVacante);
 adminRouter.get("/metrics", adminController.metricas);
+adminRouter.get("/reports/excel", adminController.reporteExcel);
+adminRouter.get("/reports/pdf", adminController.reportePdf);
