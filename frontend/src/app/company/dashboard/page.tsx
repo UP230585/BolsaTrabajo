@@ -8,6 +8,15 @@ import type { Vacante } from "@/types/jobs";
 import type { Postulacion, EstatusPostulacion } from "@/types/applications";
 import { COLUMNAS_KANBAN } from "@/types/applications";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+// Mismo criterio que en student/profile: el archivo puede venir como URL
+// absoluta (Azure Blob Storage) o como ruta relativa servida por el backend.
+const SERVIDOR_ARCHIVOS = API_BASE.replace(/\/api\/v1\/?$/, "");
+
+function urlCompletaDelCv(archivoUrl: string): string {
+  return archivoUrl.startsWith("http") ? archivoUrl : `${SERVIDOR_ARCHIVOS}${archivoUrl}`;
+}
+
 export default function CompanyDashboardPage() {
   const [vacantes, setVacantes] = useState<Vacante[]>([]);
   const [postulaciones, setPostulaciones] = useState<Postulacion[]>([]);
@@ -117,7 +126,9 @@ export default function CompanyDashboardPage() {
           <table className="w-full text-sm">
             <thead className="bg-surface text-left">
               <tr>
+                <th className="px-4 py-2">Estudiante</th>
                 <th className="px-4 py-2">Vacante</th>
+                <th className="px-4 py-2">CV</th>
                 <th className="px-4 py-2">Estatus</th>
                 <th className="px-4 py-2">Actualizar</th>
               </tr>
@@ -125,7 +136,33 @@ export default function CompanyDashboardPage() {
             <tbody>
               {postulaciones.map((p) => (
                 <tr key={p.id} className="border-t border-black/5">
+                  <td className="px-4 py-2">
+                    {p.estudiante ? (
+                      <>
+                        <p className="font-medium text-navy">{p.estudiante.matricula}</p>
+                        <p className="text-xs text-black/50">
+                          {p.estudiante.carrera.clave} · {p.estudiante.usuario.correo}
+                        </p>
+                      </>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
                   <td className="px-4 py-2">{p.vacante.titulo}</td>
+                  <td className="px-4 py-2">
+                    {p.estudiante?.cv ? (
+                      <a
+                        href={urlCompletaDelCv(p.estudiante.cv.archivoUrl)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-orange font-medium hover:underline"
+                      >
+                        Ver CV ({p.estudiante.cv.porcentaje}%)
+                      </a>
+                    ) : (
+                      <span className="text-black/40">Sin CV</span>
+                    )}
+                  </td>
                   <td className="px-4 py-2">{p.estatus}</td>
                   <td className="px-4 py-2">
                     <select
