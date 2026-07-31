@@ -47,6 +47,7 @@ export function Header() {
           {usuario?.rol === "EMPRESA" && (
             <>
               <NavLink href="/company/dashboard">Mi empresa</NavLink>
+              <NavLink href="/company/profile">Mi perfil</NavLink>
               <NavLink href="/chat">Mensajes</NavLink>
             </>
           )}
