@@ -14,6 +14,7 @@ export const filtrosVacanteSchema = z.object({
   carreraId: z.coerce.number().int().positive().optional(),
   cuatrimestre: z.coerce.number().int().min(1).max(9).optional(),
   modalidad: z.nativeEnum(Modalidad).optional(),
+  q: z.string().trim().min(1).optional(),
 });
 
 // Todos los campos opcionales: la empresa puede editar solo lo que cambió.

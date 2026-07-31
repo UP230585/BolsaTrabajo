@@ -12,11 +12,20 @@ export default function JobsPage() {
   const [carreraId, setCarreraId] = useState<number | "">("");
   const [cuatrimestre, setCuatrimestre] = useState<number | "">("");
   const [modalidad, setModalidad] = useState<Modalidad | "">("");
+  const [busqueda, setBusqueda] = useState("");
+  const [q, setQ] = useState("");
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
     listarCarrerasRequest().then(setCarreras).catch(() => setCarreras([]));
   }, []);
+
+  // Espera a que la persona deje de escribir antes de disparar la búsqueda,
+  // para no mandar una petición por cada letra.
+  useEffect(() => {
+    const temporizador = setTimeout(() => setQ(busqueda.trim()), 350);
+    return () => clearTimeout(temporizador);
+  }, [busqueda]);
 
   useEffect(() => {
     // Necesario mostrar el estado de carga cada vez que cambian los filtros, antes del fetch.
@@ -26,15 +35,27 @@ export default function JobsPage() {
       ...(carreraId ? { carreraId } : {}),
       ...(cuatrimestre ? { cuatrimestre } : {}),
       ...(modalidad ? { modalidad } : {}),
+      ...(q ? { q } : {}),
     })
       .then(setVacantes)
       .finally(() => setCargando(false));
-  }, [carreraId, cuatrimestre, modalidad]);
+  }, [carreraId, cuatrimestre, modalidad, q]);
 
   return (
     <div className="mx-auto max-w-6xl w-full px-6 py-10 flex flex-col md:flex-row gap-8">
       <aside className="w-full md:w-56 shrink-0 space-y-6">
         <h2 className="font-semibold text-navy">Filtros</h2>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">Buscar</label>
+          <input
+            type="text"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Título o palabra clave"
+            className="w-full rounded-md border border-black/20 px-2 py-1.5 text-sm"
+          />
+        </div>
 
         <div>
           <label className="block text-sm font-medium mb-1">Carrera</label>

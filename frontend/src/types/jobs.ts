@@ -34,6 +34,7 @@ export interface FiltrosVacantes {
   carreraId?: number;
   cuatrimestre?: number;
   modalidad?: Modalidad;
+  q?: string;
 }
 
 export interface ActualizarVacanteInput {

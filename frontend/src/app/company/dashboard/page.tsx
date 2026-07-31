@@ -139,9 +139,11 @@ export default function CompanyDashboardPage() {
                   <td className="px-4 py-2">
                     {p.estudiante ? (
                       <>
-                        <p className="font-medium text-navy">{p.estudiante.matricula}</p>
+                        <p className="font-medium text-navy">
+                          {p.estudiante.nombreCompleto ?? p.estudiante.matricula}
+                        </p>
                         <p className="text-xs text-black/50">
-                          {p.estudiante.carrera.clave} · {p.estudiante.usuario.correo}
+                          {p.estudiante.matricula} · {p.estudiante.carrera.clave} · {p.estudiante.usuario.correo}
                         </p>
                       </>
                     ) : (

@@ -11,6 +11,14 @@ export const vacanteRepository = {
         ...(filtros.carreraId ? { carreraId: filtros.carreraId } : {}),
         ...(filtros.cuatrimestre ? { cuatrimestreMin: { lte: filtros.cuatrimestre } } : {}),
         ...(filtros.modalidad ? { modalidad: filtros.modalidad as Modalidad } : {}),
+        ...(filtros.q
+          ? {
+              OR: [
+                { titulo: { contains: filtros.q } },
+                { descripcion: { contains: filtros.q } },
+              ],
+            }
+          : {}),
       },
       include: { carrera: true, empresa: true },
       orderBy: { creadaEn: "desc" },

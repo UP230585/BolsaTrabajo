@@ -4,7 +4,7 @@ export interface UsuarioAdmin {
   rol: "ESTUDIANTE" | "EMPRESA" | "COORDINACION";
   activo: boolean;
   creadoEn: string;
-  estudiante?: { matricula: string; carrera: { clave: string } } | null;
+  estudiante?: { nombreCompleto: string | null; matricula: string; carrera: { clave: string } } | null;
   empresa?: { razonSocial: string } | null;
 }
 

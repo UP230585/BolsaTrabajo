@@ -15,6 +15,7 @@ export interface CvDePostulante {
 
 export interface EstudiantePostulante {
   id: number;
+  nombreCompleto: string | null;
   matricula: string;
   carrera: Carrera;
   usuario: { correo: string };
