@@ -9,6 +9,7 @@ const correoEstudianteSchema = z.string().email().refine((correo) => correo.ends
 export const registrarEstudianteSchema = z.object({
   correo: correoEstudianteSchema,
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
+  nombreCompleto: z.string().trim().min(3, "Ingresa tu nombre completo"),
   matricula: z.string().min(4),
   carreraId: z.number().int().positive(),
   cuatrimestre: z.number().int().min(1).max(9),

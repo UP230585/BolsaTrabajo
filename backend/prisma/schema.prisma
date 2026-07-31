@@ -81,6 +81,7 @@ model Carrera {
 model Estudiante {
   id              Int       @id @default(autoincrement())
   usuarioId       Int       @unique
+  nombreCompleto  String?
   matricula       String    @unique
   carreraId       Int
   cuatrimestre    Int
