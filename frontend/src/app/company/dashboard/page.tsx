@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { misVacantesRequest } from "@/services/jobs.service";
+import { misVacantesRequest, cambiarEstadoVacanteRequest } from "@/services/jobs.service";
 import { postulacionesDeMiEmpresaRequest, actualizarEstatusRequest } from "@/services/applications.service";
 import type { Vacante } from "@/types/jobs";
 import type { Postulacion, EstatusPostulacion } from "@/types/applications";
@@ -12,6 +12,7 @@ export default function CompanyDashboardPage() {
   const [vacantes, setVacantes] = useState<Vacante[]>([]);
   const [postulaciones, setPostulaciones] = useState<Postulacion[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [cambiandoEstado, setCambiandoEstado] = useState<number | null>(null);
 
   useEffect(() => {
     Promise.all([misVacantesRequest(), postulacionesDeMiEmpresaRequest()])
@@ -25,6 +26,16 @@ export default function CompanyDashboardPage() {
   async function handleCambiarEstatus(id: number, estatus: EstatusPostulacion) {
     const actualizado = await actualizarEstatusRequest(id, estatus);
     setPostulaciones((prev) => prev.map((p) => (p.id === id ? { ...p, estatus: actualizado.estatus } : p)));
+  }
+
+  async function handleTogglePausa(vacante: Vacante) {
+    setCambiandoEstado(vacante.id);
+    try {
+      const actualizada = await cambiarEstadoVacanteRequest(vacante.id, !vacante.activa);
+      setVacantes((prev) => prev.map((v) => (v.id === vacante.id ? { ...v, activa: actualizada.activa } : v)));
+    } finally {
+      setCambiandoEstado(null);
+    }
   }
 
   if (cargando) {
@@ -61,17 +72,39 @@ export default function CompanyDashboardPage() {
         {vacantes.length === 0 && <p className="text-black/60">Aún no has publicado vacantes.</p>}
         {vacantes.map((v) => (
           <div key={v.id} className="rounded-lg border border-black/10 bg-white p-5">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <h3 className="font-semibold text-navy">{v.titulo}</h3>
-              <span
-                className={`text-xs rounded-full px-2 py-1 ${
-                  v.aprobada ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
-                }`}
-              >
-                {v.aprobada ? "Aprobada" : "Pendiente de aprobación"}
-              </span>
+              <div className="flex gap-1.5 flex-wrap justify-end">
+                <span
+                  className={`text-xs rounded-full px-2 py-1 whitespace-nowrap ${
+                    v.aprobada ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
+                  }`}
+                >
+                  {v.aprobada ? "Aprobada" : "Pendiente de aprobación"}
+                </span>
+                {!v.activa && (
+                  <span className="text-xs rounded-full px-2 py-1 whitespace-nowrap bg-black/10 text-black/60">
+                    Pausada
+                  </span>
+                )}
+              </div>
             </div>
             <p className="text-sm text-black/60 mt-1">{v._count?.postulaciones ?? 0} postulación(es)</p>
+            <div className="mt-4 flex gap-2">
+              <Link
+                href={`/company/jobs/edit?id=${v.id}`}
+                className="rounded-md border border-navy px-3 py-1.5 text-sm font-medium text-navy hover:bg-surface transition-colors"
+              >
+                Editar
+              </Link>
+              <button
+                onClick={() => handleTogglePausa(v)}
+                disabled={cambiandoEstado === v.id}
+                className="rounded-md border border-black/20 px-3 py-1.5 text-sm font-medium text-black/70 hover:bg-surface transition-colors disabled:opacity-50"
+              >
+                {cambiandoEstado === v.id ? "..." : v.activa ? "Pausar" : "Activar"}
+              </button>
+            </div>
           </div>
         ))}
       </div>
