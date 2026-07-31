@@ -19,6 +19,7 @@ export const userRepository = {
   createEstudiante(data: {
     correo: string;
     passwordHash: string;
+    nombreCompleto: string;
     matricula: string;
     carreraId: number;
     cuatrimestre: number;
@@ -30,6 +31,7 @@ export const userRepository = {
         rol: "ESTUDIANTE" as Rol,
         estudiante: {
           create: {
+            nombreCompleto: data.nombreCompleto,
             matricula: data.matricula,
             carreraId: data.carreraId,
             cuatrimestre: data.cuatrimestre,

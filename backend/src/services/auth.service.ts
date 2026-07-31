@@ -15,6 +15,7 @@ export const authService = {
     const usuario = await userRepository.createEstudiante({
       correo: datos.correo,
       passwordHash,
+      nombreCompleto: datos.nombreCompleto,
       matricula: datos.matricula,
       carreraId: datos.carreraId,
       cuatrimestre: datos.cuatrimestre,

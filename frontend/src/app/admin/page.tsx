@@ -207,7 +207,7 @@ export default function AdminPage() {
                     <td className="px-4 py-2">{u.rol}</td>
                     <td className="px-4 py-2 text-black/60">
                       {u.estudiante
-                        ? `${u.estudiante.matricula} · ${u.estudiante.carrera.clave}`
+                        ? `${u.estudiante.nombreCompleto ?? u.estudiante.matricula} · ${u.estudiante.matricula} · ${u.estudiante.carrera.clave}`
                         : u.empresa
                           ? u.empresa.razonSocial
                           : "—"}

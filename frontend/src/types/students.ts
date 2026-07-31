@@ -13,6 +13,7 @@ export interface CV {
 
 export interface PerfilEstudiante {
   id: number;
+  nombreCompleto: string | null;
   matricula: string;
   cuatrimestre: number;
   fotoUrl: string | null;
