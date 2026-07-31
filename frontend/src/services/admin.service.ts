@@ -42,27 +42,3 @@ export async function metricasRequest(): Promise<Metricas> {
   if (!data.data) throw new Error(data.error ?? "No se pudieron obtener las métricas");
   return data.data;
 }
-
-// El navegador solo dispara la descarga si el archivo llega como blob, así
-// que no basta con un <a href> normal: esa ruta requiere el token Bearer
-// (el interceptor de axios en api.ts ya lo agrega).
-function descargarBlob(blob: Blob, nombreArchivo: string): void {
-  const url = window.URL.createObjectURL(blob);
-  const enlace = document.createElement("a");
-  enlace.href = url;
-  enlace.download = nombreArchivo;
-  document.body.appendChild(enlace);
-  enlace.click();
-  enlace.remove();
-  window.URL.revokeObjectURL(url);
-}
-
-export async function descargarReporteExcelRequest(): Promise<void> {
-  const { data } = await api.get<Blob>("/admin/reports/excel", { responseType: "blob" });
-  descargarBlob(data, "reporte-bolsa-trabajo.xlsx");
-}
-
-export async function descargarReportePdfRequest(): Promise<void> {
-  const { data } = await api.get<Blob>("/admin/reports/pdf", { responseType: "blob" });
-  descargarBlob(data, "reporte-bolsa-trabajo.pdf");
-}

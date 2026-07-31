@@ -9,8 +9,6 @@ import {
   metricasRequest,
   listarUsuariosRequest,
   cambiarEstadoUsuarioRequest,
-  descargarReporteExcelRequest,
-  descargarReportePdfRequest,
 } from "@/services/admin.service";
 import type { EmpresaPendiente, VacantePendiente, Metricas, UsuarioAdmin } from "@/types/admin";
 
@@ -21,7 +19,6 @@ export default function AdminPage() {
   const [usuarios, setUsuarios] = useState<UsuarioAdmin[]>([]);
   const [filtroRol, setFiltroRol] = useState<"" | "ESTUDIANTE" | "EMPRESA">("");
   const [cargando, setCargando] = useState(true);
-  const [exportando, setExportando] = useState<"excel" | "pdf" | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -54,40 +51,13 @@ export default function AdminPage() {
     setVacantes((prev) => prev.filter((v) => v.id !== id));
   }
 
-  async function handleExportar(formato: "excel" | "pdf") {
-    setExportando(formato);
-    try {
-      await (formato === "excel" ? descargarReporteExcelRequest() : descargarReportePdfRequest());
-    } finally {
-      setExportando(null);
-    }
-  }
-
   if (cargando) {
     return <p className="text-center py-16 text-black/60">Cargando panel de administración...</p>;
   }
 
   return (
     <div className="mx-auto max-w-6xl w-full px-6 py-10">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-semibold text-navy">Panel de Coordinación</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleExportar("excel")}
-            disabled={exportando !== null}
-            className="rounded-md border border-navy px-4 py-2 text-sm font-medium text-navy hover:bg-surface transition-colors disabled:opacity-50"
-          >
-            {exportando === "excel" ? "Generando..." : "Exportar Excel"}
-          </button>
-          <button
-            onClick={() => handleExportar("pdf")}
-            disabled={exportando !== null}
-            className="rounded-md border border-navy px-4 py-2 text-sm font-medium text-navy hover:bg-surface transition-colors disabled:opacity-50"
-          >
-            {exportando === "pdf" ? "Generando..." : "Exportar PDF"}
-          </button>
-        </div>
-      </div>
+      <h1 className="text-2xl font-semibold text-navy mb-8">Panel de Coordinación</h1>
 
       {metricas && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">

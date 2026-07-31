@@ -1,6 +1,5 @@
 import type { Request, Response } from "express";
 import { adminService } from "../services/admin.service";
-import { reporteService } from "../services/reporte.service";
 import { aprobarSchema } from "../dtos/admin.dto";
 import { cambiarEstadoUsuarioSchema } from "../dtos/admin-usuarios.dto";
 import { Rol } from "@prisma/client";
@@ -47,22 +46,5 @@ export const adminController = {
   async metricas(_req: Request, res: Response) {
     const metricas = await adminService.metricas();
     res.status(200).json({ data: metricas, error: null });
-  },
-
-  async reporteExcel(_req: Request, res: Response) {
-    const buffer = await reporteService.generarExcel();
-    res.setHeader(
-      "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    );
-    res.setHeader("Content-Disposition", 'attachment; filename="reporte-bolsa-trabajo.xlsx"');
-    res.status(200).send(Buffer.from(buffer));
-  },
-
-  async reportePdf(_req: Request, res: Response) {
-    const buffer = await reporteService.generarPdf();
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", 'attachment; filename="reporte-bolsa-trabajo.pdf"');
-    res.status(200).send(buffer);
   },
 };
