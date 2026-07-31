@@ -1,6 +1,16 @@
 import { postulacionRepository } from "../repositories/postulacion.repository";
+import { notificacionService } from "./notificacion.service";
 import { AppError } from "../middlewares/error.middleware";
 import type { EstatusPostulacion } from "@prisma/client";
+
+const ETIQUETA_ESTATUS: Record<EstatusPostulacion, string> = {
+  POSTULADO: "Postulado",
+  VISTO: "Visto",
+  EN_CONTACTO: "En contacto",
+  ENTREVISTA: "Entrevista",
+  CONTRATADO: "Contratado",
+  NO_SELECCIONADO: "No seleccionado",
+};
 
 export const postulacionService = {
   async postularse(estudianteId: number, vacanteId: number) {
@@ -27,6 +37,14 @@ export const postulacionService = {
     if (postulacion.vacante.empresaId !== empresaId) {
       throw new AppError("No puedes modificar postulaciones de otra empresa", 403);
     }
-    return postulacionRepository.actualizarEstatus(id, estatus);
+    const actualizada = await postulacionRepository.actualizarEstatus(id, estatus);
+
+    await notificacionService.crear(
+      postulacion.estudiante.usuarioId,
+      "postulacion",
+      `Tu postulación a "${postulacion.vacante.titulo}" cambió a: ${ETIQUETA_ESTATUS[estatus]}`
+    );
+
+    return actualizada;
   },
 };

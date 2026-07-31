@@ -8,6 +8,7 @@ import { empresaRouter } from "./empresa.routes";
 import { postulacionRouter } from "./postulacion.routes";
 import { chatRouter } from "./chat.routes";
 import { adminRouter } from "./admin.routes";
+import { notificacionRouter } from "./notificacion.routes";
 
 export const apiRouter = Router();
 
@@ -20,3 +21,4 @@ apiRouter.use("/companies", empresaRouter);
 apiRouter.use("/applications", postulacionRouter);
 apiRouter.use("/chat", chatRouter);
 apiRouter.use("/admin", adminRouter);
+apiRouter.use("/notifications", notificacionRouter);
