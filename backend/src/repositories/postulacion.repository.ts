@@ -23,10 +23,15 @@ export const postulacionRepository = {
   },
 
   // Para el dashboard de la empresa: todas las postulaciones de sus vacantes.
+  // Incluye el CV (cv: true): sin esto, la empresa nunca recibía el archivo
+  // que subió el estudiante, aunque ya estuviera guardado en el servidor.
   findByEmpresa(empresaId: number) {
     return prisma.postulacion.findMany({
       where: { vacante: { empresaId } },
-      include: { vacante: true, estudiante: { include: { usuario: true, carrera: true } } },
+      include: {
+        vacante: true,
+        estudiante: { include: { usuario: true, carrera: true, cv: true } },
+      },
       orderBy: { creadaEn: "desc" },
     });
   },
