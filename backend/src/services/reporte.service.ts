@@ -47,7 +47,11 @@ async function obtenerDatosDelReporte() {
   ]);
 
   const filasUsuarios = usuarios.map((u) => ({
-    nombre: u.estudiante?.nombreCompleto ?? (u.empresa ? u.empresa.razonSocial : "—"),
+    nombre: u.estudiante
+  ? (u.estudiante.nombreCompleto ?? u.estudiante.matricula)
+  : u.empresa
+    ? u.empresa.razonSocial
+    : "—",
     correo: u.correo,
     rol: u.rol,
     detalle: u.estudiante
