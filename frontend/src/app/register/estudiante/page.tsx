@@ -64,8 +64,15 @@ export default function RegistroEstudiantePage() {
       ]}
     >
       <Card className="w-full max-w-md p-8 animate-fade-up">
-        <h1 className="text-2xl font-semibold text-navy mb-1">Registro de estudiante</h1>
-        <p className="text-sm text-black/60 mb-6">Usa tu correo institucional (@alumnos.upa.edu.mx).</p>
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy">
+            <GraduationCapIcon className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold text-navy leading-tight">Registro de estudiante</h1>
+            <p className="text-sm text-black/60">Usa tu correo institucional (@alumnos.upa.edu.mx).</p>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -91,25 +98,27 @@ export default function RegistroEstudiantePage() {
             />
           </div>
 
-          <div>
-            <Label>Contraseña</Label>
-            <Input
-              type="password"
-              required
-              minLength={8}
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-            />
-          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Contraseña</Label>
+              <Input
+                type="password"
+                required
+                minLength={8}
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+              />
+            </div>
 
-          <div>
-            <Label>Matrícula</Label>
-            <Input
-              type="text"
-              required
-              value={form.matricula}
-              onChange={(e) => setForm({ ...form, matricula: e.target.value })}
-            />
+            <div>
+              <Label>Matrícula</Label>
+              <Input
+                type="text"
+                required
+                value={form.matricula}
+                onChange={(e) => setForm({ ...form, matricula: e.target.value })}
+              />
+            </div>
           </div>
 
           <div>

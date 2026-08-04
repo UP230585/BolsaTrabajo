@@ -49,10 +49,15 @@ export default function RegistroEmpresaPage() {
       ]}
     >
       <Card className="w-full max-w-md p-8 animate-fade-up">
-        <h1 className="text-2xl font-semibold text-navy mb-1">Registro de empresa</h1>
-        <p className="text-sm text-black/60 mb-6">
-          Tu cuenta quedará pendiente de aprobación por la Coordinación de Vinculación.
-        </p>
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy">
+            <BriefcaseIcon className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold text-navy leading-tight">Registro de empresa</h1>
+            <p className="text-sm text-black/60">Queda pendiente de aprobación por Coordinación.</p>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -86,25 +91,27 @@ export default function RegistroEmpresaPage() {
             />
           </div>
 
-          <div>
-            <Label>RFC</Label>
-            <Input
-              type="text"
-              required
-              value={form.rfc}
-              onChange={(e) => setForm({ ...form, rfc: e.target.value })}
-            />
-          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>RFC</Label>
+              <Input
+                type="text"
+                required
+                value={form.rfc}
+                onChange={(e) => setForm({ ...form, rfc: e.target.value })}
+              />
+            </div>
 
-          <div>
-            <Label>Giro</Label>
-            <Input
-              type="text"
-              required
-              value={form.giro}
-              onChange={(e) => setForm({ ...form, giro: e.target.value })}
-              placeholder="Tecnología, manufactura, servicios..."
-            />
+            <div>
+              <Label>Giro</Label>
+              <Input
+                type="text"
+                required
+                value={form.giro}
+                onChange={(e) => setForm({ ...form, giro: e.target.value })}
+                placeholder="Tecnología, manufactura..."
+              />
+            </div>
           </div>
 
           {error && <p className="text-sm text-danger">{error}</p>}
