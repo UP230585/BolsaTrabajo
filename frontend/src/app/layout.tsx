@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { AuthProvider } from "@/context/AuthContext";
+import { PageTransition } from "@/components/PageTransition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,7 +36,9 @@ export default function RootLayout({
         <AuthProvider>
           <Header />
           <Breadcrumbs />
-          <main className="flex-1 flex flex-col">{children}</main>
+          <main className="flex-1 flex flex-col">
+            <PageTransition>{children}</PageTransition>
+          </main>
           <Footer />
         </AuthProvider>
       </body>
