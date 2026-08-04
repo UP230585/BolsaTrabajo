@@ -4,42 +4,51 @@ import { useEffect, useState } from "react";
 import { JobCard } from "@/components/JobCard";
 import { listarVacantesRequest } from "@/services/jobs.service";
 import { listarCarrerasRequest } from "@/services/carreras.service";
+import { useAsync } from "@/hooks/useAsync";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import type { Vacante, Carrera, Modalidad } from "@/types/jobs";
 
 export default function JobsPage() {
-  const [vacantes, setVacantes] = useState<Vacante[]>([]);
   const [carreras, setCarreras] = useState<Carrera[]>([]);
   const [carreraId, setCarreraId] = useState<number | "">("");
   const [cuatrimestre, setCuatrimestre] = useState<number | "">("");
   const [modalidad, setModalidad] = useState<Modalidad | "">("");
   const [busqueda, setBusqueda] = useState("");
-  const [q, setQ] = useState("");
-  const [cargando, setCargando] = useState(true);
+  // Espera a que la persona deje de escribir antes de disparar la búsqueda,
+  // para no mandar una petición por cada letra (ver hooks/useDebouncedValue).
+  const q = useDebouncedValue(busqueda.trim(), 350);
+
+  const [errorCarreras, setErrorCarreras] = useState<string | null>(null);
 
   useEffect(() => {
-    listarCarrerasRequest().then(setCarreras).catch(() => setCarreras([]));
+    // Si el catálogo de carreras falla, el filtro simplemente queda vacío
+    // (no bloquea ver vacantes), pero sí se avisa para no dejar al usuario
+    // pensando que no hay carreras registradas.
+    listarCarrerasRequest()
+      .then(setCarreras)
+      .catch(() => {
+        setCarreras([]);
+        setErrorCarreras("No se pudieron cargar las carreras para el filtro.");
+      });
   }, []);
 
-  // Espera a que la persona deje de escribir antes de disparar la búsqueda,
-  // para no mandar una petición por cada letra.
-  useEffect(() => {
-    const temporizador = setTimeout(() => setQ(busqueda.trim()), 350);
-    return () => clearTimeout(temporizador);
-  }, [busqueda]);
-
-  useEffect(() => {
-    // Necesario mostrar el estado de carga cada vez que cambian los filtros, antes del fetch.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setCargando(true);
-    listarVacantesRequest({
-      ...(carreraId ? { carreraId } : {}),
-      ...(cuatrimestre ? { cuatrimestre } : {}),
-      ...(modalidad ? { modalidad } : {}),
-      ...(q ? { q } : {}),
-    })
-      .then(setVacantes)
-      .finally(() => setCargando(false));
-  }, [carreraId, cuatrimestre, modalidad, q]);
+  const {
+    data: vacantesData,
+    cargando,
+    error: errorVacantes,
+  } = useAsync(
+    () =>
+      listarVacantesRequest({
+        ...(carreraId ? { carreraId } : {}),
+        ...(cuatrimestre ? { cuatrimestre } : {}),
+        ...(modalidad ? { modalidad } : {}),
+        ...(q ? { q } : {}),
+      }),
+    [carreraId, cuatrimestre, modalidad, q],
+    "No se pudieron cargar las vacantes. Revisa tu conexión e intenta de nuevo."
+  );
+  const vacantes = vacantesData ?? [];
+  const error = errorVacantes ?? errorCarreras;
 
   return (
     <div className="mx-auto max-w-6xl w-full px-6 py-10 flex flex-col md:flex-row gap-8">
@@ -106,6 +115,8 @@ export default function JobsPage() {
 
       <div className="flex-1">
         <h1 className="text-2xl font-semibold text-navy mb-6">Vacantes disponibles</h1>
+
+        {error && <p className="mb-4 text-sm text-danger">{error}</p>}
 
         {cargando && <p className="text-black/60">Cargando vacantes...</p>}
 

@@ -1,24 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { misConversacionesRequest } from "@/services/chat.service";
 import { useAuth } from "@/context/AuthContext";
-import type { Conversacion } from "@/types/chat";
+import { useAsync } from "@/hooks/useAsync";
 
 export default function ChatListPage() {
   const { usuario } = useAuth();
-  const [conversaciones, setConversaciones] = useState<Conversacion[]>([]);
-  const [cargando, setCargando] = useState(true);
-
-  useEffect(() => {
-    misConversacionesRequest()
-      .then(setConversaciones)
-      .finally(() => setCargando(false));
-  }, []);
+  const {
+    data: conversacionesData,
+    cargando,
+    error,
+    recargar,
+  } = useAsync(
+    () => misConversacionesRequest(),
+    [],
+    "No se pudieron cargar tus conversaciones."
+  );
+  const conversaciones = conversacionesData ?? [];
 
   if (cargando) {
     return <p className="text-center py-16 text-black/60">Cargando conversaciones...</p>;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-black/60 mb-3">{error}</p>
+        <button onClick={recargar} className="text-orange text-sm font-medium hover:underline">
+          Reintentar
+        </button>
+      </div>
+    );
   }
 
   return (

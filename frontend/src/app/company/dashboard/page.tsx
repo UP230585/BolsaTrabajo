@@ -21,15 +21,24 @@ export default function CompanyDashboardPage() {
   const [vacantes, setVacantes] = useState<Vacante[]>([]);
   const [postulaciones, setPostulaciones] = useState<Postulacion[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [cambiandoEstado, setCambiandoEstado] = useState<number | null>(null);
 
-  useEffect(() => {
+  function cargarDashboard() {
+    setCargando(true);
+    setError(null);
     Promise.all([misVacantesRequest(), postulacionesDeMiEmpresaRequest()])
       .then(([v, p]) => {
         setVacantes(v);
         setPostulaciones(p);
       })
+      .catch(() => setError("No se pudo cargar el dashboard. Intenta de nuevo."))
       .finally(() => setCargando(false));
+  }
+
+  useEffect(() => {
+    cargarDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleCambiarEstatus(id: number, estatus: EstatusPostulacion) {
@@ -49,6 +58,17 @@ export default function CompanyDashboardPage() {
 
   if (cargando) {
     return <p className="text-center py-16 text-black/60">Cargando tu dashboard...</p>;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-black/60 mb-3">{error}</p>
+        <button onClick={cargarDashboard} className="text-orange text-sm font-medium hover:underline">
+          Reintentar
+        </button>
+      </div>
+    );
   }
 
   return (
