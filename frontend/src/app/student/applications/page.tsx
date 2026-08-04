@@ -1,22 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { misPostulacionesRequest } from "@/services/applications.service";
 import { iniciarConversacionRequest } from "@/services/chat.service";
-import { COLUMNAS_KANBAN, type Postulacion } from "@/types/applications";
+import { useAsync } from "@/hooks/useAsync";
+import { COLUMNAS_KANBAN } from "@/types/applications";
 
 export default function StudentApplicationsPage() {
   const router = useRouter();
-  const [postulaciones, setPostulaciones] = useState<Postulacion[]>([]);
-  const [cargando, setCargando] = useState(true);
+  const {
+    data: postulacionesData,
+    cargando,
+    error,
+    recargar,
+  } = useAsync(
+    () => misPostulacionesRequest(),
+    [],
+    "No se pudieron cargar tus postulaciones. Intenta de nuevo."
+  );
+  const postulaciones = postulacionesData ?? [];
   const [abriendoChatId, setAbriendoChatId] = useState<number | null>(null);
-
-  useEffect(() => {
-    misPostulacionesRequest()
-      .then(setPostulaciones)
-      .finally(() => setCargando(false));
-  }, []);
 
   async function handleAbrirChat(vacanteId: number) {
     setAbriendoChatId(vacanteId);
@@ -36,6 +40,15 @@ export default function StudentApplicationsPage() {
     <div className="mx-auto max-w-6xl w-full px-6 py-10">
       <h1 className="text-2xl font-semibold text-navy mb-1">Mis postulaciones</h1>
       <p className="text-black/60 mb-8">Seguimiento de tus aplicaciones laborales.</p>
+
+      {error && (
+        <p className="mb-4 text-sm text-danger">
+          {error}{" "}
+          <button onClick={recargar} className="font-medium hover:underline">
+            Reintentar
+          </button>
+        </p>
+      )}
 
       {postulaciones.length === 0 ? (
         <p className="text-black/60">Todavía no te has postulado a ninguna vacante.</p>

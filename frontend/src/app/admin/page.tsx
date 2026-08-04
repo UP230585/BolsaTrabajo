@@ -21,9 +21,12 @@ export default function AdminPage() {
   const [usuarios, setUsuarios] = useState<UsuarioAdmin[]>([]);
   const [filtroRol, setFiltroRol] = useState<"" | "ESTUDIANTE" | "EMPRESA">("");
   const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [exportando, setExportando] = useState<"excel" | "pdf" | null>(null);
 
-  useEffect(() => {
+  function cargarPanel() {
+    setCargando(true);
+    setError(null);
     Promise.all([
       empresasPendientesRequest(),
       vacantesPendientesRequest(),
@@ -36,7 +39,13 @@ export default function AdminPage() {
         setMetricas(m);
         setUsuarios(u);
       })
+      .catch(() => setError("No se pudo cargar el panel de administración. Intenta de nuevo."))
       .finally(() => setCargando(false));
+  }
+
+  useEffect(() => {
+    cargarPanel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleEstadoUsuario(id: number, activo: boolean) {
@@ -65,6 +74,17 @@ export default function AdminPage() {
 
   if (cargando) {
     return <p className="text-center py-16 text-black/60">Cargando panel de administración...</p>;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-black/60 mb-3">{error}</p>
+        <button onClick={cargarPanel} className="text-orange text-sm font-medium hover:underline">
+          Reintentar
+        </button>
+      </div>
+    );
   }
 
   return (

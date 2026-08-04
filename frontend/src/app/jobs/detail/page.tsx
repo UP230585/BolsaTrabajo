@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { obtenerVacanteRequest } from "@/services/jobs.service";
 import { postularseRequest } from "@/services/applications.service";
 import { useAuth } from "@/context/AuthContext";
+import { useAsync } from "@/hooks/useAsync";
 import type { Vacante } from "@/types/jobs";
 
 const ETIQUETA_MODALIDAD: Record<Vacante["modalidad"], string> = {
@@ -30,16 +31,14 @@ function JobDetailContent() {
   const id = Number(searchParams.get("id"));
   const { usuario } = useAuth();
 
-  const [vacante, setVacante] = useState<Vacante | null>(null);
-  const [cargando, setCargando] = useState(true);
+  const {
+    data: vacante,
+    cargando,
+    error,
+    recargar,
+  } = useAsync<Vacante>(() => obtenerVacanteRequest(id), [id], "No se pudo cargar esta vacante.");
   const [postulando, setPostulando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
-
-  useEffect(() => {
-    obtenerVacanteRequest(id)
-      .then(setVacante)
-      .finally(() => setCargando(false));
-  }, [id]);
 
   async function handlePostularme() {
     setPostulando(true);
@@ -58,8 +57,17 @@ function JobDetailContent() {
     return <p className="text-center py-16 text-black/60">Cargando vacante...</p>;
   }
 
-  if (!vacante) {
-    return <p className="text-center py-16 text-black/60">No se encontró la vacante.</p>;
+  if (error || !vacante) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-black/60 mb-3">{error ?? "No se encontró la vacante."}</p>
+        {error && (
+          <button onClick={recargar} className="text-orange text-sm font-medium hover:underline">
+            Reintentar
+          </button>
+        )}
+      </div>
+    );
   }
 
   return (

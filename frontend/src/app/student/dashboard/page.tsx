@@ -1,29 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Semaforo } from "@/components/Semaforo";
 import { miPerfilRequest } from "@/services/students.service";
 import { useAuth } from "@/context/AuthContext";
-import type { PerfilEstudiante } from "@/types/students";
+import { useAsync } from "@/hooks/useAsync";
 
 export default function StudentDashboardPage() {
   const { usuario } = useAuth();
-  const [perfil, setPerfil] = useState<PerfilEstudiante | null>(null);
-  const [cargando, setCargando] = useState(true);
-
-  useEffect(() => {
-    miPerfilRequest()
-      .then(setPerfil)
-      .finally(() => setCargando(false));
-  }, []);
+  const {
+    data: perfil,
+    cargando,
+    error,
+    recargar,
+  } = useAsync(() => miPerfilRequest(), [], "No se pudo cargar tu perfil. Intenta de nuevo.");
 
   if (cargando) {
     return <p className="text-center py-16 text-black/60">Cargando tu dashboard...</p>;
   }
 
-  if (!perfil) {
-    return <p className="text-center py-16 text-black/60">No se pudo cargar tu perfil.</p>;
+  if (error || !perfil) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-black/60 mb-3">{error ?? "No se pudo cargar tu perfil."}</p>
+        <button onClick={recargar} className="text-orange text-sm font-medium hover:underline">
+          Reintentar
+        </button>
+      </div>
+    );
   }
 
   return (
