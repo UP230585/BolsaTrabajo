@@ -13,6 +13,11 @@ import {
   descargarReportePdfRequest,
 } from "@/services/admin.service";
 import type { EmpresaPendiente, VacantePendiente, Metricas, UsuarioAdmin } from "@/types/admin";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Field";
+import { PageLoading, EmptyState } from "@/components/ui/PageState";
 
 export default function AdminPage() {
   const [empresas, setEmpresas] = useState<EmpresaPendiente[]>([]);
@@ -73,7 +78,7 @@ export default function AdminPage() {
   }
 
   if (cargando) {
-    return <p className="text-center py-16 text-black/60">Cargando panel de administración...</p>;
+    return <PageLoading label="Cargando panel de administración..." />;
   }
 
   if (error) {
@@ -92,20 +97,12 @@ export default function AdminPage() {
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-semibold text-navy">Panel de Coordinación</h1>
         <div className="flex gap-2">
-          <button
-            onClick={() => handleExportar("excel")}
-            disabled={exportando !== null}
-            className="rounded-md border border-navy px-4 py-2 text-sm font-medium text-navy hover:bg-surface transition-colors disabled:opacity-50"
-          >
+          <Button variant="outline" size="md" onClick={() => handleExportar("excel")} disabled={exportando !== null}>
             {exportando === "excel" ? "Generando..." : "Exportar Excel"}
-          </button>
-          <button
-            onClick={() => handleExportar("pdf")}
-            disabled={exportando !== null}
-            className="rounded-md border border-navy px-4 py-2 text-sm font-medium text-navy hover:bg-surface transition-colors disabled:opacity-50"
-          >
+          </Button>
+          <Button variant="outline" size="md" onClick={() => handleExportar("pdf")} disabled={exportando !== null}>
             {exportando === "pdf" ? "Generando..." : "Exportar PDF"}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -120,19 +117,19 @@ export default function AdminPage() {
             { label: "Contratados", valor: metricas.postulacionesContratadas },
             { label: "Tasa de éxito", valor: `${metricas.tasaDeExito}%` },
           ].map((stat) => (
-            <div key={stat.label} className="rounded-lg border border-black/10 bg-white p-4 text-center">
+            <Card key={stat.label} className="p-4 text-center">
               <p className="text-2xl font-bold text-navy">{stat.valor}</p>
               <p className="text-xs text-black/60 mt-1">{stat.label}</p>
-            </div>
+            </Card>
           ))}
         </div>
       )}
 
       <h2 className="font-semibold text-navy mb-3">Empresas pendientes de aprobación</h2>
       {empresas.length === 0 ? (
-        <p className="text-black/60 mb-10">No hay empresas pendientes.</p>
+        <EmptyState>No hay empresas pendientes.</EmptyState>
       ) : (
-        <div className="rounded-lg border border-black/10 bg-white divide-y divide-black/5 mb-10">
+        <div className="rounded-lg border border-black/10 bg-white shadow-sm divide-y divide-black/5 mb-10">
           {empresas.map((e) => (
             <div key={e.id} className="flex items-center justify-between px-5 py-4">
               <div>
@@ -142,18 +139,12 @@ export default function AdminPage() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <button
-                  onClick={() => handleEmpresa(e.id, true)}
-                  className="rounded-md bg-success px-3 py-1.5 text-xs font-medium text-white hover:opacity-90"
-                >
+                <Button variant="success" size="sm" onClick={() => handleEmpresa(e.id, true)}>
                   Aprobar
-                </button>
-                <button
-                  onClick={() => handleEmpresa(e.id, false)}
-                  className="rounded-md bg-danger px-3 py-1.5 text-xs font-medium text-white hover:opacity-90"
-                >
+                </Button>
+                <Button variant="danger" size="sm" onClick={() => handleEmpresa(e.id, false)}>
                   Rechazar
-                </button>
+                </Button>
               </div>
             </div>
           ))}
@@ -162,9 +153,9 @@ export default function AdminPage() {
 
       <h2 className="font-semibold text-navy mb-3">Vacantes pendientes de aprobación</h2>
       {vacantes.length === 0 ? (
-        <p className="text-black/60 mb-10">No hay vacantes pendientes.</p>
+        <EmptyState>No hay vacantes pendientes.</EmptyState>
       ) : (
-        <div className="rounded-lg border border-black/10 bg-white divide-y divide-black/5 mb-10">
+        <div className="rounded-lg border border-black/10 bg-white shadow-sm divide-y divide-black/5 mb-10">
           {vacantes.map((v) => (
             <div key={v.id} className="flex items-center justify-between px-5 py-4">
               <div>
@@ -174,18 +165,12 @@ export default function AdminPage() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <button
-                  onClick={() => handleVacante(v.id, true)}
-                  className="rounded-md bg-success px-3 py-1.5 text-xs font-medium text-white hover:opacity-90"
-                >
+                <Button variant="success" size="sm" onClick={() => handleVacante(v.id, true)}>
                   Aprobar
-                </button>
-                <button
-                  onClick={() => handleVacante(v.id, false)}
-                  className="rounded-md bg-danger px-3 py-1.5 text-xs font-medium text-white hover:opacity-90"
-                >
+                </Button>
+                <Button variant="danger" size="sm" onClick={() => handleVacante(v.id, false)}>
                   Rechazar
-                </button>
+                </Button>
               </div>
             </div>
           ))}
@@ -194,20 +179,20 @@ export default function AdminPage() {
 
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-semibold text-navy">Usuarios registrados</h2>
-        <select
+        <Select
+          size="sm"
           value={filtroRol}
           onChange={(e) => setFiltroRol(e.target.value as "" | "ESTUDIANTE" | "EMPRESA")}
-          className="rounded-md border border-black/20 px-2 py-1 text-xs"
         >
           <option value="">Todos los roles</option>
           <option value="ESTUDIANTE">Estudiantes</option>
           <option value="EMPRESA">Empresas</option>
-        </select>
+        </Select>
       </div>
       {usuarios.filter((u) => !filtroRol || u.rol === filtroRol).length === 0 ? (
-        <p className="text-black/60">No hay usuarios que coincidan con ese filtro.</p>
+        <EmptyState>No hay usuarios que coincidan con ese filtro.</EmptyState>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-black/10 bg-white">
+        <div className="overflow-x-auto rounded-lg border border-black/10 bg-white shadow-sm">
           <table className="w-full text-sm">
             <thead className="bg-surface text-left">
               <tr>
@@ -233,13 +218,7 @@ export default function AdminPage() {
                           : "—"}
                     </td>
                     <td className="px-4 py-2">
-                      <span
-                        className={`text-xs rounded-full px-2 py-1 ${
-                          u.activo ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
-                        }`}
-                      >
-                        {u.activo ? "Activo" : "Desactivado"}
-                      </span>
+                      <Badge tone={u.activo ? "success" : "danger"}>{u.activo ? "Activo" : "Desactivado"}</Badge>
                     </td>
                     <td className="px-4 py-2">
                       <button

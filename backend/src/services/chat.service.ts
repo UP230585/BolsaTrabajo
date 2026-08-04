@@ -21,12 +21,36 @@ export const chatService = {
     return chatRepository.findOrCreateConversacion(estudianteId, vacante.empresaId);
   },
 
-  misConversacionesEstudiante(estudianteId: number) {
-    return chatRepository.findConversacionesDeEstudiante(estudianteId);
+  async misConversacionesEstudiante(estudianteId: number) {
+    const conversaciones = await chatRepository.findConversacionesDeEstudiante(estudianteId);
+    return this.conContactoHabilitado(conversaciones);
   },
 
-  misConversacionesEmpresa(empresaId: number) {
-    return chatRepository.findConversacionesDeEmpresa(empresaId);
+  async misConversacionesEmpresa(empresaId: number) {
+    const conversaciones = await chatRepository.findConversacionesDeEmpresa(empresaId);
+    return this.conContactoHabilitado(conversaciones);
+  },
+
+  conContactoHabilitado<T extends { estudianteId: number; empresaId: number }>(conversaciones: T[]) {
+    return Promise.all(
+      conversaciones.map(async (c) => ({
+        ...c,
+        contactoHabilitado: await chatRepository.tieneContactoHabilitado(c.estudianteId, c.empresaId),
+      }))
+    );
+  },
+
+  async obtenerConversacion(conversacionId: number, participante: { estudianteId?: number; empresaId?: number }) {
+    const conversacion = await chatRepository.findByIdConDetalle(conversacionId);
+    if (!conversacion) {
+      throw new AppError("Conversación no encontrada", 404);
+    }
+    this.validarParticipante(conversacion, participante);
+    const contactoHabilitado = await chatRepository.tieneContactoHabilitado(
+      conversacion.estudianteId,
+      conversacion.empresaId
+    );
+    return { ...conversacion, contactoHabilitado };
   },
 
   async obtenerMensajes(conversacionId: number, participante: { estudianteId?: number; empresaId?: number }) {
@@ -49,6 +73,18 @@ export const chatService = {
       throw new AppError("Conversación no encontrada", 404);
     }
     this.validarParticipante(conversacion, participante);
+
+    const contactoHabilitado = await chatRepository.tieneContactoHabilitado(
+      conversacion.estudianteId,
+      conversacion.empresaId
+    );
+    if (!contactoHabilitado) {
+      throw new AppError(
+        "Todavía no pueden chatear: la empresa debe marcar la postulación como 'En contacto' o más avanzada.",
+        403
+      );
+    }
+
     const mensaje = await chatRepository.crearMensaje(conversacionId, emisorRol, contenido);
 
     // Se avisa a quien NO mandó el mensaje, no a quien lo escribió.

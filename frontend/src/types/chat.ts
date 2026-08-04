@@ -16,4 +16,5 @@ export interface Conversacion {
   estudiante?: { usuario: { correo: string } };
   empresa?: { razonSocial: string };
   mensajes?: Mensaje[];
+  contactoHabilitado: boolean;
 }
