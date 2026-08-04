@@ -53,6 +53,58 @@ export const adminRepository = {
     return prisma.vacante.update({
       where: { id },
       data: { aprobada },
+      include: { empresa: true },
+    });
+  },
+
+  // --- Listados completos para los reportes detallados (Excel/PDF) ---
+
+  listarVacantesCompleto() {
+    return prisma.vacante.findMany({
+      include: {
+        empresa: true,
+        carrera: true,
+        _count: { select: { postulaciones: true } },
+      },
+      orderBy: { creadaEn: "desc" },
+    });
+  },
+
+  listarPostulacionesCompleto() {
+    return prisma.postulacion.findMany({
+      include: {
+        estudiante: { include: { usuario: true, carrera: true } },
+        vacante: { include: { empresa: true } },
+      },
+      orderBy: { creadaEn: "desc" },
+    });
+  },
+
+  listarEmpresasCompleto() {
+    return prisma.empresa.findMany({
+      include: {
+        usuario: true,
+        _count: { select: { vacantes: true } },
+      },
+      orderBy: { id: "asc" },
+    });
+  },
+
+  estudiantesPorCarrera() {
+    return prisma.carrera.findMany({
+      select: {
+        nombre: true,
+        clave: true,
+        _count: { select: { estudiantes: true, vacantes: true } },
+      },
+      orderBy: { nombre: "asc" },
+    });
+  },
+
+  postulacionesPorEstatus() {
+    return prisma.postulacion.groupBy({
+      by: ["estatus"],
+      _count: true,
     });
   },
 

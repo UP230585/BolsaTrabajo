@@ -2,24 +2,43 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { misVacantesRequest } from "@/services/jobs.service";
+import { misVacantesRequest, cambiarEstadoVacanteRequest } from "@/services/jobs.service";
 import { postulacionesDeMiEmpresaRequest, actualizarEstatusRequest } from "@/services/applications.service";
 import type { Vacante } from "@/types/jobs";
 import type { Postulacion, EstatusPostulacion } from "@/types/applications";
 import { COLUMNAS_KANBAN } from "@/types/applications";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+// Mismo criterio que en student/profile: el archivo puede venir como URL
+// absoluta (Azure Blob Storage) o como ruta relativa servida por el backend.
+const SERVIDOR_ARCHIVOS = API_BASE.replace(/\/api\/v1\/?$/, "");
+
+function urlCompletaDelCv(archivoUrl: string): string {
+  return archivoUrl.startsWith("http") ? archivoUrl : `${SERVIDOR_ARCHIVOS}${archivoUrl}`;
+}
+
 export default function CompanyDashboardPage() {
   const [vacantes, setVacantes] = useState<Vacante[]>([]);
   const [postulaciones, setPostulaciones] = useState<Postulacion[]>([]);
   const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [cambiandoEstado, setCambiandoEstado] = useState<number | null>(null);
 
-  useEffect(() => {
+  function cargarDashboard() {
+    setCargando(true);
+    setError(null);
     Promise.all([misVacantesRequest(), postulacionesDeMiEmpresaRequest()])
       .then(([v, p]) => {
         setVacantes(v);
         setPostulaciones(p);
       })
+      .catch(() => setError("No se pudo cargar el dashboard. Intenta de nuevo."))
       .finally(() => setCargando(false));
+  }
+
+  useEffect(() => {
+    cargarDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleCambiarEstatus(id: number, estatus: EstatusPostulacion) {
@@ -27,8 +46,29 @@ export default function CompanyDashboardPage() {
     setPostulaciones((prev) => prev.map((p) => (p.id === id ? { ...p, estatus: actualizado.estatus } : p)));
   }
 
+  async function handleTogglePausa(vacante: Vacante) {
+    setCambiandoEstado(vacante.id);
+    try {
+      const actualizada = await cambiarEstadoVacanteRequest(vacante.id, !vacante.activa);
+      setVacantes((prev) => prev.map((v) => (v.id === vacante.id ? { ...v, activa: actualizada.activa } : v)));
+    } finally {
+      setCambiandoEstado(null);
+    }
+  }
+
   if (cargando) {
     return <p className="text-center py-16 text-black/60">Cargando tu dashboard...</p>;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-black/60 mb-3">{error}</p>
+        <button onClick={cargarDashboard} className="text-orange text-sm font-medium hover:underline">
+          Reintentar
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -61,17 +101,39 @@ export default function CompanyDashboardPage() {
         {vacantes.length === 0 && <p className="text-black/60">Aún no has publicado vacantes.</p>}
         {vacantes.map((v) => (
           <div key={v.id} className="rounded-lg border border-black/10 bg-white p-5">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <h3 className="font-semibold text-navy">{v.titulo}</h3>
-              <span
-                className={`text-xs rounded-full px-2 py-1 ${
-                  v.aprobada ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
-                }`}
-              >
-                {v.aprobada ? "Aprobada" : "Pendiente de aprobación"}
-              </span>
+              <div className="flex gap-1.5 flex-wrap justify-end">
+                <span
+                  className={`text-xs rounded-full px-2 py-1 whitespace-nowrap ${
+                    v.aprobada ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
+                  }`}
+                >
+                  {v.aprobada ? "Aprobada" : "Pendiente de aprobación"}
+                </span>
+                {!v.activa && (
+                  <span className="text-xs rounded-full px-2 py-1 whitespace-nowrap bg-black/10 text-black/60">
+                    Pausada
+                  </span>
+                )}
+              </div>
             </div>
             <p className="text-sm text-black/60 mt-1">{v._count?.postulaciones ?? 0} postulación(es)</p>
+            <div className="mt-4 flex gap-2">
+              <Link
+                href={`/company/jobs/edit?id=${v.id}`}
+                className="rounded-md border border-navy px-3 py-1.5 text-sm font-medium text-navy hover:bg-surface transition-colors"
+              >
+                Editar
+              </Link>
+              <button
+                onClick={() => handleTogglePausa(v)}
+                disabled={cambiandoEstado === v.id}
+                className="rounded-md border border-black/20 px-3 py-1.5 text-sm font-medium text-black/70 hover:bg-surface transition-colors disabled:opacity-50"
+              >
+                {cambiandoEstado === v.id ? "..." : v.activa ? "Pausar" : "Activar"}
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -84,7 +146,9 @@ export default function CompanyDashboardPage() {
           <table className="w-full text-sm">
             <thead className="bg-surface text-left">
               <tr>
+                <th className="px-4 py-2">Estudiante</th>
                 <th className="px-4 py-2">Vacante</th>
+                <th className="px-4 py-2">CV</th>
                 <th className="px-4 py-2">Estatus</th>
                 <th className="px-4 py-2">Actualizar</th>
               </tr>
@@ -92,7 +156,35 @@ export default function CompanyDashboardPage() {
             <tbody>
               {postulaciones.map((p) => (
                 <tr key={p.id} className="border-t border-black/5">
+                  <td className="px-4 py-2">
+                    {p.estudiante ? (
+                      <>
+                        <p className="font-medium text-navy">
+                          {p.estudiante.nombreCompleto ?? p.estudiante.matricula}
+                        </p>
+                        <p className="text-xs text-black/50">
+                          {p.estudiante.matricula} · {p.estudiante.carrera.clave} · {p.estudiante.usuario.correo}
+                        </p>
+                      </>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
                   <td className="px-4 py-2">{p.vacante.titulo}</td>
+                  <td className="px-4 py-2">
+                    {p.estudiante?.cv ? (
+                      <a
+                        href={urlCompletaDelCv(p.estudiante.cv.archivoUrl)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-orange font-medium hover:underline"
+                      >
+                        Ver CV ({p.estudiante.cv.porcentaje}%)
+                      </a>
+                    ) : (
+                      <span className="text-black/40">Sin CV</span>
+                    )}
+                  </td>
                   <td className="px-4 py-2">{p.estatus}</td>
                   <td className="px-4 py-2">
                     <select

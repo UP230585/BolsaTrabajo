@@ -14,6 +14,7 @@ export interface LoginResponse {
 export interface RegistroEstudianteInput {
   correo: string;
   password: string;
+  nombreCompleto: string;
   matricula: string;
   carreraId: number;
   cuatrimestre: number;

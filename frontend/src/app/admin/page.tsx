@@ -9,6 +9,8 @@ import {
   metricasRequest,
   listarUsuariosRequest,
   cambiarEstadoUsuarioRequest,
+  descargarReporteExcelRequest,
+  descargarReportePdfRequest,
 } from "@/services/admin.service";
 import type { EmpresaPendiente, VacantePendiente, Metricas, UsuarioAdmin } from "@/types/admin";
 
@@ -19,8 +21,12 @@ export default function AdminPage() {
   const [usuarios, setUsuarios] = useState<UsuarioAdmin[]>([]);
   const [filtroRol, setFiltroRol] = useState<"" | "ESTUDIANTE" | "EMPRESA">("");
   const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [exportando, setExportando] = useState<"excel" | "pdf" | null>(null);
 
-  useEffect(() => {
+  function cargarPanel() {
+    setCargando(true);
+    setError(null);
     Promise.all([
       empresasPendientesRequest(),
       vacantesPendientesRequest(),
@@ -33,7 +39,13 @@ export default function AdminPage() {
         setMetricas(m);
         setUsuarios(u);
       })
+      .catch(() => setError("No se pudo cargar el panel de administración. Intenta de nuevo."))
       .finally(() => setCargando(false));
+  }
+
+  useEffect(() => {
+    cargarPanel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleEstadoUsuario(id: number, activo: boolean) {
@@ -51,13 +63,51 @@ export default function AdminPage() {
     setVacantes((prev) => prev.filter((v) => v.id !== id));
   }
 
+  async function handleExportar(formato: "excel" | "pdf") {
+    setExportando(formato);
+    try {
+      await (formato === "excel" ? descargarReporteExcelRequest() : descargarReportePdfRequest());
+    } finally {
+      setExportando(null);
+    }
+  }
+
   if (cargando) {
     return <p className="text-center py-16 text-black/60">Cargando panel de administración...</p>;
   }
 
+  if (error) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-black/60 mb-3">{error}</p>
+        <button onClick={cargarPanel} className="text-orange text-sm font-medium hover:underline">
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-6xl w-full px-6 py-10">
-      <h1 className="text-2xl font-semibold text-navy mb-8">Panel de Coordinación</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-2xl font-semibold text-navy">Panel de Coordinación</h1>
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleExportar("excel")}
+            disabled={exportando !== null}
+            className="rounded-md border border-navy px-4 py-2 text-sm font-medium text-navy hover:bg-surface transition-colors disabled:opacity-50"
+          >
+            {exportando === "excel" ? "Generando..." : "Exportar Excel"}
+          </button>
+          <button
+            onClick={() => handleExportar("pdf")}
+            disabled={exportando !== null}
+            className="rounded-md border border-navy px-4 py-2 text-sm font-medium text-navy hover:bg-surface transition-colors disabled:opacity-50"
+          >
+            {exportando === "pdf" ? "Generando..." : "Exportar PDF"}
+          </button>
+        </div>
+      </div>
 
       {metricas && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
@@ -177,7 +227,7 @@ export default function AdminPage() {
                     <td className="px-4 py-2">{u.rol}</td>
                     <td className="px-4 py-2 text-black/60">
                       {u.estudiante
-                        ? `${u.estudiante.matricula} · ${u.estudiante.carrera.clave}`
+                        ? `${u.estudiante.nombreCompleto ?? u.estudiante.matricula} · ${u.estudiante.matricula} · ${u.estudiante.carrera.clave}`
                         : u.empresa
                           ? u.empresa.razonSocial
                           : "—"}

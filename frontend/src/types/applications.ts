@@ -1,4 +1,4 @@
-import type { Vacante } from "./jobs";
+import type { Vacante, Carrera } from "./jobs";
 
 export type EstatusPostulacion =
   | "POSTULADO"
@@ -8,12 +8,29 @@ export type EstatusPostulacion =
   | "CONTRATADO"
   | "NO_SELECCIONADO";
 
+export interface CvDePostulante {
+  archivoUrl: string;
+  porcentaje: number;
+}
+
+export interface EstudiantePostulante {
+  id: number;
+  nombreCompleto: string | null;
+  matricula: string;
+  carrera: Carrera;
+  usuario: { correo: string };
+  cv: CvDePostulante | null;
+}
+
 export interface Postulacion {
   id: number;
   estatus: EstatusPostulacion;
   creadaEn: string;
   actualizadaEn: string;
   vacante: Vacante;
+  // Solo viene lleno en la vista de la empresa (postulacionesDeMiEmpresa);
+  // en "mis postulaciones" del estudiante no aplica y llega undefined.
+  estudiante?: EstudiantePostulante;
 }
 
 export const COLUMNAS_KANBAN: { estatus: EstatusPostulacion; titulo: string }[] = [

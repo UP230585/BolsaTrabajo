@@ -11,6 +11,14 @@ export const vacanteRepository = {
         ...(filtros.carreraId ? { carreraId: filtros.carreraId } : {}),
         ...(filtros.cuatrimestre ? { cuatrimestreMin: { lte: filtros.cuatrimestre } } : {}),
         ...(filtros.modalidad ? { modalidad: filtros.modalidad as Modalidad } : {}),
+        ...(filtros.q
+          ? {
+              OR: [
+                { titulo: { contains: filtros.q } },
+                { descripcion: { contains: filtros.q } },
+              ],
+            }
+          : {}),
       },
       include: { carrera: true, empresa: true },
       orderBy: { creadaEn: "desc" },
@@ -42,6 +50,41 @@ export const vacanteRepository = {
   }) {
     return prisma.vacante.create({
       data: { ...datos, empresaId, aprobada: false, activa: true },
+    });
+  },
+
+  update(id: number, datos: {
+    titulo?: string | undefined;
+    descripcion?: string | undefined;
+    carreraId?: number | undefined;
+    cuatrimestreMin?: number | undefined;
+    modalidad?: Modalidad | undefined;
+    salario?: number | undefined;
+    aprobada?: boolean | undefined;
+  }) {
+    // Spread condicional en vez de pasar "datos" tal cual: con
+    // exactOptionalPropertyTypes, un campo ausente y uno presente con
+    // valor undefined no son lo mismo, y Prisma solo acepta lo primero.
+    return prisma.vacante.update({
+      where: { id },
+      data: {
+        ...(datos.titulo !== undefined ? { titulo: datos.titulo } : {}),
+        ...(datos.descripcion !== undefined ? { descripcion: datos.descripcion } : {}),
+        ...(datos.carreraId !== undefined ? { carreraId: datos.carreraId } : {}),
+        ...(datos.cuatrimestreMin !== undefined ? { cuatrimestreMin: datos.cuatrimestreMin } : {}),
+        ...(datos.modalidad !== undefined ? { modalidad: datos.modalidad } : {}),
+        ...(datos.salario !== undefined ? { salario: datos.salario } : {}),
+        ...(datos.aprobada !== undefined ? { aprobada: datos.aprobada } : {}),
+      },
+      include: { carrera: true, empresa: true },
+    });
+  },
+
+  updateStatus(id: number, activa: boolean) {
+    return prisma.vacante.update({
+      where: { id },
+      data: { activa },
+      include: { carrera: true, empresa: true },
     });
   },
 };

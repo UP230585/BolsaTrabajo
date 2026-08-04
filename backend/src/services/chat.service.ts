@@ -1,6 +1,7 @@
 import { chatRepository } from "../repositories/chat.repository";
 import { vacanteRepository } from "../repositories/vacante.repository";
 import { postulacionRepository } from "../repositories/postulacion.repository";
+import { notificacionService } from "./notificacion.service";
 import { AppError } from "../middlewares/error.middleware";
 import type { EmisorMensaje } from "@prisma/client";
 
@@ -48,7 +49,14 @@ export const chatService = {
       throw new AppError("Conversación no encontrada", 404);
     }
     this.validarParticipante(conversacion, participante);
-    return chatRepository.crearMensaje(conversacionId, emisorRol, contenido);
+    const mensaje = await chatRepository.crearMensaje(conversacionId, emisorRol, contenido);
+
+    // Se avisa a quien NO mandó el mensaje, no a quien lo escribió.
+    const usuarioANotificar =
+      emisorRol === "ESTUDIANTE" ? conversacion.empresa.usuarioId : conversacion.estudiante.usuarioId;
+    await notificacionService.crear(usuarioANotificar, "chat", "Tienes un nuevo mensaje en el chat");
+
+    return mensaje;
   },
 
   validarParticipante(

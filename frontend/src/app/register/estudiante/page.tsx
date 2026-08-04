@@ -25,6 +25,7 @@ export default function RegistroEstudiantePage() {
   const [form, setForm] = useState({
     correo: "",
     password: "",
+    nombreCompleto: "",
     matricula: "",
     carreraId: CARRERAS[0].id,
     cuatrimestre: 1,
@@ -62,6 +63,19 @@ export default function RegistroEstudiantePage() {
               onChange={(e) => setForm({ ...form, correo: e.target.value })}
               className="w-full rounded-md border border-black/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-navy"
               placeholder="tucorreo@alumnos.upa.edu.mx"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Nombre completo</label>
+            <input
+              type="text"
+              required
+              minLength={3}
+              value={form.nombreCompleto}
+              onChange={(e) => setForm({ ...form, nombreCompleto: e.target.value })}
+              className="w-full rounded-md border border-black/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-navy"
+              placeholder="Como aparece en tu credencial"
             />
           </div>
 

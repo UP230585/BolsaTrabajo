@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { NotificationBell } from "./NotificationBell";
 
 // Resalta el enlace de la página en la que está el usuario (indicador de
 // "dónde estoy" pedido explícitamente para la evaluación).
@@ -47,6 +48,7 @@ export function Header() {
           {usuario?.rol === "EMPRESA" && (
             <>
               <NavLink href="/company/dashboard">Mi empresa</NavLink>
+              <NavLink href="/company/profile">Mi perfil</NavLink>
               <NavLink href="/chat">Mensajes</NavLink>
             </>
           )}
@@ -55,6 +57,7 @@ export function Header() {
 
         {usuario ? (
           <div className="flex items-center gap-4 text-sm">
+            <NotificationBell />
             <span className="hidden sm:inline">{usuario.correo}</span>
             <button
               onClick={logout}

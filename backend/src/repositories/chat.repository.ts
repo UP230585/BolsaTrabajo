@@ -36,6 +36,8 @@ export const chatRepository = {
   findById(id: number) {
     return prisma.conversacion.findUnique({
       where: { id },
+      // No hace falta include de usuario aquí: estudiante.usuarioId y
+      // empresa.usuarioId ya vienen como campos escalares de cada modelo.
       include: { estudiante: true, empresa: true },
     });
   },

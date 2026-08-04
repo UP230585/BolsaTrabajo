@@ -28,9 +28,26 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="flex-1 w-full max-w-md rounded-lg bg-white/5 border border-white/10 p-6">
-            <p className="text-sm text-white/70">
-              Aqui vamos a poner algo
+            <p className="text-sm font-semibold uppercase tracking-wide text-orange mb-4">
+              ¿Cómo funciona?
             </p>
+            <ol className="space-y-4">
+              {[
+                { paso: "Crea tu cuenta", detalle: "Con tu correo institucional y los datos de tu carrera." },
+                { paso: "Sube tu CV", detalle: "Lo analizamos al instante y te decimos qué le falta." },
+                { paso: "Postula en 1 clic", detalle: "Y da seguimiento a cada proceso desde tu dashboard." },
+              ].map((item, i) => (
+                <li key={item.paso} className="flex items-start gap-3">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange text-sm font-bold text-white">
+                    {i + 1}
+                  </span>
+                  <div>
+                    <p className="font-medium text-white">{item.paso}</p>
+                    <p className="text-sm text-white/70">{item.detalle}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
         </div>
       </section>
