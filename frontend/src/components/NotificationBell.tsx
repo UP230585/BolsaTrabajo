@@ -7,6 +7,7 @@ import {
   marcarTodasLeidasRequest,
 } from "@/services/notifications.service";
 import type { Notificacion } from "@/types/notifications";
+import { BellIcon } from "./ui/icons";
 
 const INTERVALO_REFRESCO_MS = 30_000;
 
@@ -67,7 +68,7 @@ export function NotificationBell() {
         aria-label="Notificaciones"
         className="relative rounded-md p-2 hover:bg-white/10 transition-colors"
       >
-        <span aria-hidden>🔔</span>
+        <BellIcon className="h-5 w-5" aria-hidden />
         {noLeidas > 0 && (
           <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-orange px-1 text-[10px] font-semibold text-white">
             {noLeidas > 9 ? "9+" : noLeidas}
@@ -76,7 +77,7 @@ export function NotificationBell() {
       </button>
 
       {abierto && (
-        <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-lg border border-black/10 bg-white text-black shadow-lg z-50">
+        <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-lg border border-black/10 bg-white text-black shadow-lg z-50 origin-top-right animate-pop-in">
           <div className="flex items-center justify-between px-4 py-3 border-b border-black/10">
             <span className="font-semibold text-navy text-sm">Notificaciones</span>
             {noLeidas > 0 && (

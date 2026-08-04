@@ -4,6 +4,9 @@ import { useEffect, useRef, useState, type DragEvent } from "react";
 import { Semaforo } from "@/components/Semaforo";
 import { miPerfilRequest, analizarCvRequest } from "@/services/students.service";
 import type { PerfilEstudiante, DetalleAnalisisCv } from "@/types/students";
+import { Card } from "@/components/ui/Card";
+import { PageLoading } from "@/components/ui/PageState";
+import { CheckCircleIcon, XCircleIcon, UploadCloudIcon, FileTextIcon } from "@/components/ui/icons";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 // La URL del CV puede venir de dos formas segun donde este guardado:
@@ -30,6 +33,7 @@ export default function StudentProfilePage() {
   const [porcentaje, setPorcentaje] = useState(0);
   const [detalles, setDetalles] = useState<DetalleAnalisisCv[]>([]);
   const [archivoUrl, setArchivoUrl] = useState<string | null>(null);
+  const [nombreArchivo, setNombreArchivo] = useState<string | null>(null);
   const [analizando, setAnalizando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [arrastrando, setArrastrando] = useState(false);
@@ -69,6 +73,7 @@ export default function StudentProfilePage() {
       return;
     }
 
+    setNombreArchivo(archivo.name);
     setAnalizando(true);
     try {
       const resultado = await analizarCvRequest(archivo);
@@ -90,11 +95,11 @@ export default function StudentProfilePage() {
   }
 
   if (cargando) {
-    return <p className="text-center py-16 text-black/60">Cargando tu perfil...</p>;
+    return <PageLoading label="Cargando tu perfil..." />;
   }
 
   if (!perfil) {
-    return <p className="text-center py-16 text-black/60">No se pudo cargar tu perfil.</p>;
+    return <PageLoading label="No se pudo cargar tu perfil." />;
   }
 
   const listaMostrada: DetalleAnalisisCv[] =
@@ -103,7 +108,7 @@ export default function StudentProfilePage() {
       : SECCIONES_BASE.map((seccion) => ({ seccion, encontrado: false, evidencia: null }));
 
   return (
-    <div className="mx-auto max-w-5xl w-full px-6 py-10">
+    <div className="mx-auto max-w-6xl w-full px-6 py-10">
       <h1 className="text-2xl font-semibold text-navy mb-1">Validador de CV</h1>
       <p className="text-black/60 mb-8">
         Sube tu CV en PDF y el sistema detectará automáticamente qué secciones incluye.
@@ -111,7 +116,7 @@ export default function StudentProfilePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Columna izquierda: subida y vista previa */}
-        <div className="rounded-lg border border-black/10 bg-white p-6">
+        <Card className="p-6 shadow-sm">
           <h2 className="font-semibold text-navy mb-4">Tu CV</h2>
 
           <div
@@ -122,12 +127,15 @@ export default function StudentProfilePage() {
             onDragLeave={() => setArrastrando(false)}
             onDrop={handleDrop}
             onClick={() => inputRef.current?.click()}
-            className={`cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
-              arrastrando ? "border-orange bg-orange/5" : "border-black/20 hover:border-navy"
+            className={`cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-all ${
+              arrastrando ? "border-orange bg-orange/5 scale-[1.01]" : "border-black/20 hover:border-navy hover:bg-surface/50"
             }`}
           >
+            <UploadCloudIcon
+              className={`h-9 w-9 mx-auto mb-3 transition-colors ${arrastrando ? "text-orange" : "text-black/30"}`}
+            />
             <p className="text-sm text-black/70">
-              {analizando ? "Analizando tu CV..." : "Arrastra tu CV aquí o haz clic para elegir un archivo"}
+              {analizando ? `Analizando ${nombreArchivo ?? "tu CV"}...` : "Arrastra tu CV aquí o haz clic para elegir un archivo"}
             </p>
             <p className="text-xs text-black/40 mt-1">Solo PDF, máximo 5 MB</p>
           </div>
@@ -147,18 +155,21 @@ export default function StudentProfilePage() {
 
           {archivoUrl && (
             <div className="mt-4">
-              <p className="text-xs text-black/50 mb-2">Vista previa</p>
+              <div className="flex items-center gap-2 mb-2 text-xs text-black/50">
+                <FileTextIcon className="h-4 w-4" />
+                <span className="truncate">{nombreArchivo ?? "Vista previa"}</span>
+              </div>
               <iframe
                 src={urlCompletaDelCv(archivoUrl)}
                 title="Vista previa del CV"
-                className="w-full h-72 rounded border border-black/10"
+                className="w-full h-72 rounded-lg border border-black/10"
               />
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Columna derecha: resultado del análisis */}
-        <div className="rounded-lg border border-black/10 bg-white p-6">
+        <Card className="p-6 shadow-sm">
           <h2 className="font-semibold text-navy mb-4">Análisis automático</h2>
 
           <div className="flex flex-col items-center gap-2 mb-6">
@@ -172,12 +183,19 @@ export default function StudentProfilePage() {
             </p>
           </div>
 
-          <ul className="space-y-2">
+          <ul className="space-y-1.5">
             {listaMostrada.map((d) => (
-              <li key={d.seccion} className="flex items-start gap-2 text-sm">
-                <span className={d.encontrado ? "text-success" : "text-danger"}>
-                  {d.encontrado ? "✓" : "✕"}
-                </span>
+              <li
+                key={d.seccion}
+                className={`flex items-start gap-2 text-sm rounded-lg px-3 py-2 ${
+                  d.encontrado ? "bg-success/5" : "bg-danger/5"
+                }`}
+              >
+                {d.encontrado ? (
+                  <CheckCircleIcon className="h-4 w-4 mt-0.5 shrink-0 text-success" />
+                ) : (
+                  <XCircleIcon className="h-4 w-4 mt-0.5 shrink-0 text-danger" />
+                )}
                 <span className="flex-1">
                   {d.seccion}
                   {d.evidencia && (
@@ -198,7 +216,7 @@ export default function StudentProfilePage() {
               ¡Listo! Tu perfil ya puede ser visto por las empresas.
             </p>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   );

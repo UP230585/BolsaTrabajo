@@ -36,6 +36,13 @@ export const chatController = {
     res.status(200).json({ data: conversaciones, error: null });
   },
 
+  async conversacion(req: Request, res: Response) {
+    const conversacionId = Number(req.params.id);
+    const perfil = await perfilDelUsuario(req.usuario!.userId);
+    const conversacion = await chatService.obtenerConversacion(conversacionId, perfil);
+    res.status(200).json({ data: conversacion, error: null });
+  },
+
   async mensajes(req: Request, res: Response) {
     const conversacionId = Number(req.params.id);
     const perfil = await perfilDelUsuario(req.usuario!.userId);

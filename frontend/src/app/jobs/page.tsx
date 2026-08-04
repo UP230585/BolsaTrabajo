@@ -7,6 +7,8 @@ import { listarCarrerasRequest } from "@/services/carreras.service";
 import { useAsync } from "@/hooks/useAsync";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import type { Vacante, Carrera, Modalidad } from "@/types/jobs";
+import { Label, Input, Select } from "@/components/ui/Field";
+import { PageLoading, EmptyState } from "@/components/ui/PageState";
 
 export default function JobsPage() {
   const [carreras, setCarreras] = useState<Carrera[]>([]);
@@ -56,22 +58,22 @@ export default function JobsPage() {
         <h2 className="font-semibold text-navy">Filtros</h2>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Buscar</label>
-          <input
+          <Label>Buscar</Label>
+          <Input
+            size="sm"
             type="text"
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             placeholder="Título o palabra clave"
-            className="w-full rounded-md border border-black/20 px-2 py-1.5 text-sm"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Carrera</label>
-          <select
+          <Label>Carrera</Label>
+          <Select
+            size="sm"
             value={carreraId}
             onChange={(e) => setCarreraId(e.target.value ? Number(e.target.value) : "")}
-            className="w-full rounded-md border border-black/20 px-2 py-1.5 text-sm"
           >
             <option value="">Todas</option>
             {carreras.map((c) => (
@@ -79,15 +81,15 @@ export default function JobsPage() {
                 {c.clave}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Cuatrimestre</label>
-          <select
+          <Label>Cuatrimestre</Label>
+          <Select
+            size="sm"
             value={cuatrimestre}
             onChange={(e) => setCuatrimestre(e.target.value ? Number(e.target.value) : "")}
-            className="w-full rounded-md border border-black/20 px-2 py-1.5 text-sm"
           >
             <option value="">Todos</option>
             {Array.from({ length: 9 }, (_, i) => i + 1).map((c) => (
@@ -95,21 +97,17 @@ export default function JobsPage() {
                 {c}°
               </option>
             ))}
-          </select>
+          </Select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Modalidad</label>
-          <select
-            value={modalidad}
-            onChange={(e) => setModalidad(e.target.value as Modalidad | "")}
-            className="w-full rounded-md border border-black/20 px-2 py-1.5 text-sm"
-          >
+          <Label>Modalidad</Label>
+          <Select size="sm" value={modalidad} onChange={(e) => setModalidad(e.target.value as Modalidad | "")}>
             <option value="">Todas</option>
             <option value="PRESENCIAL">Presencial</option>
             <option value="HIBRIDO">Híbrido</option>
             <option value="REMOTO">Remoto</option>
-          </select>
+          </Select>
         </div>
       </aside>
 
@@ -118,10 +116,10 @@ export default function JobsPage() {
 
         {error && <p className="mb-4 text-sm text-danger">{error}</p>}
 
-        {cargando && <p className="text-black/60">Cargando vacantes...</p>}
+        {cargando && <PageLoading label="Cargando vacantes..." />}
 
         {!cargando && vacantes.length === 0 && (
-          <p className="text-black/60">No hay vacantes que coincidan con esos filtros.</p>
+          <EmptyState>No hay vacantes que coincidan con esos filtros.</EmptyState>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
