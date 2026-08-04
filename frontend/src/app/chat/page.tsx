@@ -5,6 +5,10 @@ import Link from "next/link";
 import { misConversacionesRequest } from "@/services/chat.service";
 import { useAuth } from "@/context/AuthContext";
 import type { Conversacion } from "@/types/chat";
+import { PageLoading, EmptyState } from "@/components/ui/PageState";
+import { Avatar } from "@/components/ui/Avatar";
+import { Badge } from "@/components/ui/Badge";
+import { ChatBubbleIcon } from "@/components/ui/icons";
 
 export default function ChatListPage() {
   const { usuario } = useAuth();
@@ -18,7 +22,7 @@ export default function ChatListPage() {
   }, []);
 
   if (cargando) {
-    return <p className="text-center py-16 text-black/60">Cargando conversaciones...</p>;
+    return <PageLoading label="Cargando conversaciones..." />;
   }
 
   return (
@@ -31,9 +35,12 @@ export default function ChatListPage() {
       </p>
 
       {conversaciones.length === 0 ? (
-        <p className="text-black/60">Todavía no tienes conversaciones activas.</p>
+        <EmptyState>
+          <ChatBubbleIcon className="h-8 w-8 mx-auto mb-3 text-black/30" />
+          Todavía no tienes conversaciones activas.
+        </EmptyState>
       ) : (
-        <div className="rounded-lg border border-black/10 bg-white divide-y divide-black/5">
+        <div className="rounded-lg border border-black/10 bg-white shadow-sm divide-y divide-black/5 overflow-hidden">
           {conversaciones.map((c) => {
             const ultimoMensaje = c.mensajes?.[0];
             const nombre = usuario?.rol === "ESTUDIANTE" ? c.empresa?.razonSocial : c.estudiante?.usuario.correo;
@@ -41,10 +48,18 @@ export default function ChatListPage() {
               <Link
                 key={c.id}
                 href={`/chat/conversation?id=${c.id}`}
-                className="flex items-center justify-between px-5 py-4 hover:bg-surface transition-colors"
+                className="flex items-center gap-4 px-5 py-4 hover:bg-surface transition-colors"
               >
-                <div>
-                  <p className="font-medium text-navy">{nombre ?? "Conversación"}</p>
+                <Avatar nombre={nombre ?? "?"} className="h-11 w-11 text-sm" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-navy truncate">{nombre ?? "Conversación"}</p>
+                    {!c.contactoHabilitado && (
+                      <Badge tone="neutral" className="shrink-0">
+                        Pendiente de contacto
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-sm text-black/60 truncate max-w-md">
                     {ultimoMensaje ? ultimoMensaje.contenido : "Sin mensajes todavía"}
                   </p>

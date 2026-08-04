@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { misPostulacionesRequest } from "@/services/applications.service";
 import { iniciarConversacionRequest } from "@/services/chat.service";
 import { COLUMNAS_KANBAN, type Postulacion } from "@/types/applications";
+import { PageLoading, EmptyState } from "@/components/ui/PageState";
 
 export default function StudentApplicationsPage() {
   const router = useRouter();
@@ -29,7 +30,7 @@ export default function StudentApplicationsPage() {
   }
 
   if (cargando) {
-    return <p className="text-center py-16 text-black/60">Cargando tus postulaciones...</p>;
+    return <PageLoading label="Cargando tus postulaciones..." />;
   }
 
   return (
@@ -38,7 +39,7 @@ export default function StudentApplicationsPage() {
       <p className="text-black/60 mb-8">Seguimiento de tus aplicaciones laborales.</p>
 
       {postulaciones.length === 0 ? (
-        <p className="text-black/60">Todavía no te has postulado a ninguna vacante.</p>
+        <EmptyState>Todavía no te has postulado a ninguna vacante.</EmptyState>
       ) : (
         <div className="flex gap-4 overflow-x-auto pb-4">
           {COLUMNAS_KANBAN.map((columna) => {
@@ -51,7 +52,7 @@ export default function StudentApplicationsPage() {
                 </h2>
                 <div className="space-y-2">
                   {items.map((p) => (
-                    <div key={p.id} className="rounded-md bg-white border border-black/10 p-3">
+                    <div key={p.id} className="rounded-lg bg-white border border-black/10 p-3">
                       <p className="text-sm font-medium text-navy">{p.vacante.titulo}</p>
                       <p className="text-xs text-black/60">{p.vacante.empresa.razonSocial}</p>
                       <p className="text-[10px] text-black/40 mt-1">

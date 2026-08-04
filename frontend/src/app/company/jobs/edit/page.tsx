@@ -5,10 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { listarCarrerasRequest } from "@/services/carreras.service";
 import { obtenerVacanteRequest, actualizarVacanteRequest } from "@/services/jobs.service";
 import type { Carrera, Modalidad } from "@/types/jobs";
+import { Label, Input, Select, Textarea } from "@/components/ui/Field";
+import { Button } from "@/components/ui/Button";
+import { PageLoading } from "@/components/ui/PageState";
 
 export default function EditarVacantePage() {
   return (
-    <Suspense fallback={<p className="text-center py-16 text-black/60">Cargando vacante...</p>}>
+    <Suspense fallback={<PageLoading label="Cargando vacante..." />}>
       <EditarVacanteContent />
     </Suspense>
   );
@@ -69,7 +72,7 @@ function EditarVacanteContent() {
   }
 
   if (cargando) {
-    return <p className="text-center py-16 text-black/60">Cargando vacante...</p>;
+    return <PageLoading label="Cargando vacante..." />;
   }
 
   return (
@@ -79,83 +82,77 @@ function EditarVacanteContent() {
         Al guardar cambios, la vacante vuelve a quedar pendiente de aprobación por la Coordinación.
       </p>
 
-      <form onSubmit={handleSubmit} className="rounded-lg border border-black/10 bg-white p-8 space-y-4">
+      <form onSubmit={handleSubmit} className="rounded-lg border border-black/10 bg-white shadow-sm p-8 space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Título del puesto</label>
-          <input
+          <Label>Título del puesto</Label>
+          <Input
             type="text"
             required
             value={form.titulo}
             onChange={(e) => setForm({ ...form, titulo: e.target.value })}
-            className="w-full rounded-md border border-black/20 px-3 py-2"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Descripción</label>
-          <textarea
+          <Label>Descripción</Label>
+          <Textarea
             required
             rows={4}
             value={form.descripcion}
             onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-            className="w-full rounded-md border border-black/20 px-3 py-2"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Carrera requerida</label>
-            <select
+            <Label>Carrera requerida</Label>
+            <Select
               value={form.carreraId}
               onChange={(e) => setForm({ ...form, carreraId: Number(e.target.value) })}
-              className="w-full rounded-md border border-black/20 px-3 py-2"
             >
               {carreras.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.clave}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Cuatrimestre mínimo</label>
-            <select
+            <Label>Cuatrimestre mínimo</Label>
+            <Select
               value={form.cuatrimestreMin}
               onChange={(e) => setForm({ ...form, cuatrimestreMin: Number(e.target.value) })}
-              className="w-full rounded-md border border-black/20 px-3 py-2"
             >
               {Array.from({ length: 9 }, (_, i) => i + 1).map((c) => (
                 <option key={c} value={c}>
                   {c}°
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Modalidad</label>
-            <select
+            <Label>Modalidad</Label>
+            <Select
               value={form.modalidad}
               onChange={(e) => setForm({ ...form, modalidad: e.target.value as Modalidad })}
-              className="w-full rounded-md border border-black/20 px-3 py-2"
             >
               <option value="PRESENCIAL">Presencial</option>
               <option value="HIBRIDO">Híbrido</option>
               <option value="REMOTO">Remoto</option>
-            </select>
+            </Select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Salario (opcional)</label>
-            <input
+            <Label>Salario (opcional)</Label>
+            <Input
               type="number"
               min={0}
               value={form.salario}
               onChange={(e) => setForm({ ...form, salario: e.target.value })}
-              className="w-full rounded-md border border-black/20 px-3 py-2"
               placeholder="8000"
             />
           </div>
@@ -163,13 +160,9 @@ function EditarVacanteContent() {
 
         {error && <p className="text-sm text-danger">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={enviando}
-          className="w-full rounded-md bg-orange px-4 py-2.5 font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-        >
+        <Button type="submit" disabled={enviando} className="w-full">
           {enviando ? "Guardando..." : "Guardar cambios"}
-        </button>
+        </Button>
       </form>
     </div>
   );

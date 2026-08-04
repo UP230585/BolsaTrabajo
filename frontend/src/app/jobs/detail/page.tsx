@@ -6,6 +6,10 @@ import { obtenerVacanteRequest } from "@/services/jobs.service";
 import { postularseRequest } from "@/services/applications.service";
 import { useAuth } from "@/context/AuthContext";
 import type { Vacante } from "@/types/jobs";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { PageLoading } from "@/components/ui/PageState";
 
 const ETIQUETA_MODALIDAD: Record<Vacante["modalidad"], string> = {
   PRESENCIAL: "Presencial",
@@ -15,7 +19,7 @@ const ETIQUETA_MODALIDAD: Record<Vacante["modalidad"], string> = {
 
 export default function JobDetailPage() {
   return (
-    <Suspense fallback={<p className="text-center py-16 text-black/60">Cargando vacante...</p>}>
+    <Suspense fallback={<PageLoading label="Cargando vacante..." />}>
       <JobDetailContent />
     </Suspense>
   );
@@ -55,35 +59,29 @@ function JobDetailContent() {
   }
 
   if (cargando) {
-    return <p className="text-center py-16 text-black/60">Cargando vacante...</p>;
+    return <PageLoading label="Cargando vacante..." />;
   }
 
   if (!vacante) {
-    return <p className="text-center py-16 text-black/60">No se encontró la vacante.</p>;
+    return <PageLoading label="No se encontró la vacante." />;
   }
 
   return (
     <div className="mx-auto max-w-3xl w-full px-6 py-10">
-      <div className="rounded-lg border border-black/10 bg-white p-8">
+      <Card className="p-8">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold text-navy">{vacante.titulo}</h1>
             <p className="text-black/60">{vacante.empresa.razonSocial}</p>
           </div>
-          <span className="text-xs rounded-full bg-surface px-3 py-1 text-black/60 whitespace-nowrap">
-            {ETIQUETA_MODALIDAD[vacante.modalidad]}
-          </span>
+          <Badge tone="neutral">{ETIQUETA_MODALIDAD[vacante.modalidad]}</Badge>
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2 text-xs">
-          <span className="rounded-full bg-navy/10 text-navy px-2 py-1">{vacante.carrera.nombre}</span>
-          <span className="rounded-full bg-navy/10 text-navy px-2 py-1">
-            Desde {vacante.cuatrimestreMin}° cuatrimestre
-          </span>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Badge tone="navy">{vacante.carrera.nombre}</Badge>
+          <Badge tone="navy">Desde {vacante.cuatrimestreMin}° cuatrimestre</Badge>
           {vacante.salario && (
-            <span className="rounded-full bg-success/10 text-success px-2 py-1">
-              ${Number(vacante.salario).toLocaleString("es-MX")}
-            </span>
+            <Badge tone="success">${Number(vacante.salario).toLocaleString("es-MX")}</Badge>
           )}
         </div>
 
@@ -92,13 +90,9 @@ function JobDetailContent() {
 
         {usuario?.rol === "ESTUDIANTE" && (
           <div className="mt-8">
-            <button
-              onClick={handlePostularme}
-              disabled={postulando}
-              className="rounded-md bg-orange px-6 py-3 font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-            >
+            <Button size="lg" onClick={handlePostularme} disabled={postulando}>
               {postulando ? "Enviando..." : "Postularme con un clic"}
-            </button>
+            </Button>
             {mensaje && <p className="mt-3 text-sm text-black/70">{mensaje}</p>}
           </div>
         )}
@@ -108,7 +102,7 @@ function JobDetailContent() {
             Inicia sesión como estudiante para postularte a esta vacante.
           </p>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

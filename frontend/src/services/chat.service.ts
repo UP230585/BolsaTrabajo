@@ -13,6 +13,12 @@ export async function misConversacionesRequest(): Promise<Conversacion[]> {
   return data.data ?? [];
 }
 
+export async function obtenerConversacionRequest(id: number): Promise<Conversacion> {
+  const { data } = await api.get<ApiEnvelope<Conversacion>>(`/chat/${id}`);
+  if (!data.data) throw new Error(data.error ?? "No se pudo cargar la conversación");
+  return data.data;
+}
+
 export async function obtenerMensajesRequest(conversacionId: number): Promise<Mensaje[]> {
   const { data } = await api.get<ApiEnvelope<Mensaje[]>>(`/chat/${conversacionId}/mensajes`);
   return data.data ?? [];

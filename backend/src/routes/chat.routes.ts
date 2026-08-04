@@ -9,5 +9,6 @@ chatRouter.use(requireAuth, requireRole(Rol.ESTUDIANTE, Rol.EMPRESA));
 
 chatRouter.post("/iniciar", requireRole(Rol.ESTUDIANTE), chatController.iniciar);
 chatRouter.get("/", chatController.misConversaciones);
+chatRouter.get("/:id", chatController.conversacion);
 chatRouter.get("/:id/mensajes", chatController.mensajes);
 chatRouter.post("/:id/mensajes", chatController.enviar);

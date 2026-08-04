@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { NotificationBell } from "./NotificationBell";
+import { buttonClasses } from "./ui/Button";
 
 // Resalta el enlace de la página en la que está el usuario (indicador de
 // "dónde estoy" pedido explícitamente para la evaluación).
@@ -29,7 +30,7 @@ export function Header() {
   const { usuario, logout } = useAuth();
 
   return (
-    <header className="bg-navy text-white">
+    <header className="bg-navy text-white shadow-md relative z-10">
       <div className="mx-auto max-w-6xl flex items-center justify-between px-6 py-4">
         <Link href="/" className="text-lg font-semibold tracking-tight">
           Bolsa de Trabajo UPA
@@ -59,18 +60,12 @@ export function Header() {
           <div className="flex items-center gap-4 text-sm">
             <NotificationBell />
             <span className="hidden sm:inline">{usuario.correo}</span>
-            <button
-              onClick={logout}
-              className="rounded-md bg-orange px-4 py-2 font-medium hover:opacity-90 transition-opacity"
-            >
+            <button onClick={logout} className={buttonClasses("primary", "md")}>
               Cerrar sesión
             </button>
           </div>
         ) : (
-          <Link
-            href="/login"
-            className="rounded-md bg-orange px-4 py-2 text-sm font-medium hover:opacity-90 transition-opacity"
-          >
+          <Link href="/login" className={buttonClasses("primary", "md")}>
             Iniciar sesión
           </Link>
         )}
