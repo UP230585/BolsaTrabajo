@@ -8,7 +8,7 @@ import { Label, Input } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { AuthLayout } from "@/components/ui/AuthLayout";
-import { KeyIcon } from "@/components/ui/icons";
+import { LockIcon } from "@/components/ui/icons";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -35,7 +35,7 @@ export default function LoginPage() {
 
   return (
     <AuthLayout
-      icon={<KeyIcon className="h-6 w-6" />}
+      icon={<LockIcon className="h-6 w-6" />}
       title="Un solo lugar para tu vida profesional en la UPA"
       subtitle="Estudiantes y empresas coordinados por la Universidad Politécnica de Aguascalientes."
       bullets={[
@@ -47,7 +47,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm p-8 animate-fade-up">
         <div className="mb-6 flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy">
-            <KeyIcon className="h-5 w-5" />
+            <LockIcon className="h-5 w-5" />
           </div>
           <h1 className="text-2xl font-semibold text-navy">Iniciar sesión</h1>
         </div>
