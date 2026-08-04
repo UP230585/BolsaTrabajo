@@ -45,7 +45,12 @@ export default function LoginPage() {
       ]}
     >
       <Card className="w-full max-w-sm p-8 animate-fade-up">
-        <h1 className="text-2xl font-semibold text-navy mb-6">Iniciar sesión</h1>
+        <div className="mb-6 flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy/10 text-navy">
+            <KeyIcon className="h-5 w-5" />
+          </div>
+          <h1 className="text-2xl font-semibold text-navy">Iniciar sesión</h1>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
