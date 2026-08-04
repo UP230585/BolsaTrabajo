@@ -3,6 +3,11 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { Label, Input } from "@/components/ui/Field";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { AuthLayout } from "@/components/ui/AuthLayout";
+import { BriefcaseIcon } from "@/components/ui/icons";
 
 export default function RegistroEmpresaPage() {
   const { registrarEmpresa } = useAuth();
@@ -33,8 +38,17 @@ export default function RegistroEmpresaPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-surface px-6 py-16">
-      <div className="w-full max-w-md rounded-lg bg-white border border-black/10 p-8 shadow-sm">
+    <AuthLayout
+      icon={<BriefcaseIcon className="h-6 w-6" />}
+      title="Encuentra el talento que tu empresa necesita"
+      subtitle="Publica vacantes y recibe candidatos ya validados por la Coordinación de Vinculación."
+      bullets={[
+        "Publica una vacante en minutos",
+        "Filtra por carrera y cuatrimestre automáticamente",
+        "Chatea directo con tus candidatos",
+      ]}
+    >
+      <Card className="w-full max-w-md p-8 animate-fade-up">
         <h1 className="text-2xl font-semibold text-navy mb-1">Registro de empresa</h1>
         <p className="text-sm text-black/60 mb-6">
           Tu cuenta quedará pendiente de aprobación por la Coordinación de Vinculación.
@@ -42,73 +56,64 @@ export default function RegistroEmpresaPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Correo de contacto</label>
-            <input
+            <Label>Correo de contacto</Label>
+            <Input
               type="email"
               required
               value={form.correo}
               onChange={(e) => setForm({ ...form, correo: e.target.value })}
-              className="w-full rounded-md border border-black/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-navy"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Contraseña</label>
-            <input
+            <Label>Contraseña</Label>
+            <Input
               type="password"
               required
               minLength={8}
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full rounded-md border border-black/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-navy"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Razón social</label>
-            <input
+            <Label>Razón social</Label>
+            <Input
               type="text"
               required
               value={form.razonSocial}
               onChange={(e) => setForm({ ...form, razonSocial: e.target.value })}
-              className="w-full rounded-md border border-black/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-navy"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">RFC</label>
-            <input
+            <Label>RFC</Label>
+            <Input
               type="text"
               required
               value={form.rfc}
               onChange={(e) => setForm({ ...form, rfc: e.target.value })}
-              className="w-full rounded-md border border-black/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-navy"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Giro</label>
-            <input
+            <Label>Giro</Label>
+            <Input
               type="text"
               required
               value={form.giro}
               onChange={(e) => setForm({ ...form, giro: e.target.value })}
-              className="w-full rounded-md border border-black/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-navy"
               placeholder="Tecnología, manufactura, servicios..."
             />
           </div>
 
           {error && <p className="text-sm text-danger">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={enviando}
-            className="w-full rounded-md bg-orange px-4 py-2 font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
+          <Button type="submit" disabled={enviando} className="w-full">
             {enviando ? "Enviando..." : "Registrar empresa"}
-          </button>
+          </Button>
         </form>
-      </div>
-    </div>
+      </Card>
+    </AuthLayout>
   );
 }

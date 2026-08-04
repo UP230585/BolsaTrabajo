@@ -4,6 +4,11 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { Label, Input } from "@/components/ui/Field";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { AuthLayout } from "@/components/ui/AuthLayout";
+import { KeyIcon } from "@/components/ui/icons";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -29,49 +34,48 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-surface px-6 py-16">
-      <div className="w-full max-w-sm rounded-lg bg-white border border-black/10 p-8 shadow-sm">
+    <AuthLayout
+      icon={<KeyIcon className="h-6 w-6" />}
+      title="Un solo lugar para tu vida profesional en la UPA"
+      subtitle="Estudiantes y empresas coordinados por la Universidad Politécnica de Aguascalientes."
+      bullets={[
+        "Vacantes filtradas por tu carrera y cuatrimestre",
+        "Postulaciones y contacto con empresas en un solo panel",
+        "Todo validado por la Coordinación de Vinculación",
+      ]}
+    >
+      <Card className="w-full max-w-sm p-8 animate-fade-up">
         <h1 className="text-2xl font-semibold text-navy mb-6">Iniciar sesión</h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="correo" className="block text-sm font-medium mb-1">
-              Correo
-            </label>
-            <input
+            <Label htmlFor="correo">Correo</Label>
+            <Input
               id="correo"
               type="email"
               required
               value={correo}
               onChange={(e) => setCorreo(e.target.value)}
-              className="w-full rounded-md border border-black/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-navy"
               placeholder="tucorreo@alumnos.upa.edu.mx"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-1">
-              Contraseña
-            </label>
-            <input
+            <Label htmlFor="password">Contraseña</Label>
+            <Input
               id="password"
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-md border border-black/20 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-navy"
             />
           </div>
 
           {error && <p className="text-sm text-danger">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={enviando}
-            className="w-full rounded-md bg-orange px-4 py-2 font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-          >
+          <Button type="submit" disabled={enviando} className="w-full">
             {enviando ? "Ingresando..." : "Ingresar"}
-          </button>
+          </Button>
         </form>
 
         <p className="mt-6 text-sm text-black/60 text-center">
@@ -85,7 +89,7 @@ export default function LoginPage() {
           </Link>
           .
         </p>
-      </div>
-    </div>
+      </Card>
+    </AuthLayout>
   );
 }

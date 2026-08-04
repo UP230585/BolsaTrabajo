@@ -3,6 +3,10 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { miPerfilEmpresaRequest, actualizarPerfilEmpresaRequest } from "@/services/company.service";
 import type { PerfilEmpresa } from "@/types/company";
+import { Label, Input } from "@/components/ui/Field";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { PageLoading } from "@/components/ui/PageState";
 
 export default function CompanyProfilePage() {
   const [perfil, setPerfil] = useState<PerfilEmpresa | null>(null);
@@ -39,11 +43,11 @@ export default function CompanyProfilePage() {
   }
 
   if (cargando) {
-    return <p className="text-center py-16 text-black/60">Cargando tu perfil...</p>;
+    return <PageLoading label="Cargando tu perfil..." />;
   }
 
   if (!perfil) {
-    return <p className="text-center py-16 text-black/60">{error ?? "No se pudo cargar tu perfil."}</p>;
+    return <PageLoading label={error ?? "No se pudo cargar tu perfil."} />;
   }
 
   return (
@@ -53,64 +57,49 @@ export default function CompanyProfilePage() {
         {perfil.usuario.correo} · {perfil._count.vacantes} vacante(s) publicada(s)
       </p>
 
-      <form onSubmit={handleSubmit} className="rounded-lg border border-black/10 bg-white p-8 space-y-4">
+      <form onSubmit={handleSubmit} className="rounded-lg border border-black/10 bg-white shadow-sm p-8 space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Razón social</label>
-          <input
+          <Label>Razón social</Label>
+          <Input
             type="text"
             required
             minLength={2}
             value={form.razonSocial}
             onChange={(e) => setForm({ ...form, razonSocial: e.target.value })}
-            className="w-full rounded-md border border-black/20 px-3 py-2"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Giro</label>
-          <input
+          <Label>Giro</Label>
+          <Input
             type="text"
             required
             minLength={2}
             value={form.giro}
             onChange={(e) => setForm({ ...form, giro: e.target.value })}
-            className="w-full rounded-md border border-black/20 px-3 py-2"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">RFC</label>
-          <input
-            type="text"
-            disabled
-            value={perfil.rfc}
-            className="w-full rounded-md border border-black/10 bg-surface px-3 py-2 text-black/50"
-          />
+          <Label>RFC</Label>
+          <Input type="text" disabled value={perfil.rfc} />
           <p className="text-xs text-black/40 mt-1">
             El RFC no se puede editar aquí: es tu identificador legal, verificado por la Coordinación.
           </p>
         </div>
 
         <div>
-          <span
-            className={`inline-block text-xs rounded-full px-2 py-1 ${
-              perfil.aprobada ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
-            }`}
-          >
+          <Badge tone={perfil.aprobada ? "success" : "warning"}>
             {perfil.aprobada ? "Empresa aprobada" : "Pendiente de aprobación"}
-          </span>
+          </Badge>
         </div>
 
         {error && <p className="text-sm text-danger">{error}</p>}
         {guardado && <p className="text-sm text-success">Perfil actualizado.</p>}
 
-        <button
-          type="submit"
-          disabled={guardando}
-          className="w-full rounded-md bg-orange px-4 py-2.5 font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-        >
+        <Button type="submit" disabled={guardando} className="w-full">
           {guardando ? "Guardando..." : "Guardar cambios"}
-        </button>
+        </Button>
       </form>
     </div>
   );

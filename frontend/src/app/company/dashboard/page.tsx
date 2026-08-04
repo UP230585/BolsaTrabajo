@@ -7,6 +7,32 @@ import { postulacionesDeMiEmpresaRequest, actualizarEstatusRequest } from "@/ser
 import type { Vacante } from "@/types/jobs";
 import type { Postulacion, EstatusPostulacion } from "@/types/applications";
 import { COLUMNAS_KANBAN } from "@/types/applications";
+import { Card } from "@/components/ui/Card";
+import { Badge, type BadgeTone } from "@/components/ui/Badge";
+import { Button, buttonClasses } from "@/components/ui/Button";
+import { Select } from "@/components/ui/Field";
+import { PageLoading, EmptyState } from "@/components/ui/PageState";
+import { Avatar } from "@/components/ui/Avatar";
+import { FileTextIcon } from "@/components/ui/icons";
+
+const TONO_ESTATUS: Record<EstatusPostulacion, BadgeTone> = {
+  POSTULADO: "neutral",
+  VISTO: "navy",
+  EN_CONTACTO: "warning",
+  ENTREVISTA: "orange",
+  CONTRATADO: "success",
+  NO_SELECCIONADO: "danger",
+};
+
+const ETIQUETA_ESTATUS: Record<EstatusPostulacion, string> = Object.fromEntries(
+  COLUMNAS_KANBAN.map((c) => [c.estatus, c.titulo])
+) as Record<EstatusPostulacion, string>;
+
+function tonoPorPorcentajeCv(porcentaje: number): BadgeTone {
+  if (porcentaje >= 100) return "success";
+  if (porcentaje >= 50) return "warning";
+  return "danger";
+}
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 // Mismo criterio que en student/profile: el archivo puede venir como URL
@@ -57,7 +83,7 @@ export default function CompanyDashboardPage() {
   }
 
   if (cargando) {
-    return <p className="text-center py-16 text-black/60">Cargando tu dashboard...</p>;
+    return <PageLoading label="Cargando tu dashboard..." />;
   }
 
   if (error) {
@@ -81,16 +107,10 @@ export default function CompanyDashboardPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Link
-            href="/chat"
-            className="rounded-md border border-navy px-5 py-2.5 font-medium text-navy hover:bg-surface transition-colors"
-          >
+          <Link href="/chat" className={buttonClasses("outline", "md")}>
             Mensajes
           </Link>
-          <Link
-            href="/company/jobs/new"
-            className="rounded-md bg-orange px-5 py-2.5 font-medium text-white hover:opacity-90 transition-opacity"
-          >
+          <Link href="/company/jobs/new" className={buttonClasses("primary", "md")}>
             Publicar vacante
           </Link>
         </div>
@@ -98,106 +118,107 @@ export default function CompanyDashboardPage() {
 
       <h2 className="font-semibold text-navy mb-3">Mis vacantes</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
-        {vacantes.length === 0 && <p className="text-black/60">Aún no has publicado vacantes.</p>}
+        {vacantes.length === 0 && <EmptyState>Aún no has publicado vacantes.</EmptyState>}
         {vacantes.map((v) => (
-          <div key={v.id} className="rounded-lg border border-black/10 bg-white p-5">
+          <Card key={v.id} className="p-5">
             <div className="flex items-center justify-between gap-2">
               <h3 className="font-semibold text-navy">{v.titulo}</h3>
               <div className="flex gap-1.5 flex-wrap justify-end">
-                <span
-                  className={`text-xs rounded-full px-2 py-1 whitespace-nowrap ${
-                    v.aprobada ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
-                  }`}
-                >
+                <Badge tone={v.aprobada ? "success" : "warning"}>
                   {v.aprobada ? "Aprobada" : "Pendiente de aprobación"}
-                </span>
-                {!v.activa && (
-                  <span className="text-xs rounded-full px-2 py-1 whitespace-nowrap bg-black/10 text-black/60">
-                    Pausada
-                  </span>
-                )}
+                </Badge>
+                {!v.activa && <Badge tone="neutral">Pausada</Badge>}
               </div>
             </div>
             <p className="text-sm text-black/60 mt-1">{v._count?.postulaciones ?? 0} postulación(es)</p>
             <div className="mt-4 flex gap-2">
-              <Link
-                href={`/company/jobs/edit?id=${v.id}`}
-                className="rounded-md border border-navy px-3 py-1.5 text-sm font-medium text-navy hover:bg-surface transition-colors"
-              >
+              <Link href={`/company/jobs/edit?id=${v.id}`} className={buttonClasses("outline", "sm")}>
                 Editar
               </Link>
-              <button
+              <Button
+                variant="neutral"
+                size="sm"
                 onClick={() => handleTogglePausa(v)}
                 disabled={cambiandoEstado === v.id}
-                className="rounded-md border border-black/20 px-3 py-1.5 text-sm font-medium text-black/70 hover:bg-surface transition-colors disabled:opacity-50"
               >
                 {cambiandoEstado === v.id ? "..." : v.activa ? "Pausar" : "Activar"}
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
 
       <h2 className="font-semibold text-navy mb-3">Candidatos</h2>
       {postulaciones.length === 0 ? (
-        <p className="text-black/60">Todavía no han recibido postulaciones.</p>
+        <EmptyState>Todavía no han recibido postulaciones.</EmptyState>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-black/10 bg-white">
+        <div className="overflow-x-auto rounded-lg border border-black/10 bg-white shadow-sm">
           <table className="w-full text-sm">
-            <thead className="bg-surface text-left">
+            <thead className="bg-surface/70 text-left text-xs uppercase tracking-wide text-black/50">
               <tr>
-                <th className="px-4 py-2">Estudiante</th>
-                <th className="px-4 py-2">Vacante</th>
-                <th className="px-4 py-2">CV</th>
-                <th className="px-4 py-2">Estatus</th>
-                <th className="px-4 py-2">Actualizar</th>
+                <th className="px-4 py-3 font-semibold">Estudiante</th>
+                <th className="px-4 py-3 font-semibold">Vacante</th>
+                <th className="px-4 py-3 font-semibold">CV</th>
+                <th className="px-4 py-3 font-semibold">Estatus</th>
+                <th className="px-4 py-3 font-semibold">Actualizar</th>
               </tr>
             </thead>
-            <tbody>
-              {postulaciones.map((p) => (
-                <tr key={p.id} className="border-t border-black/5">
-                  <td className="px-4 py-2">
+            <tbody className="divide-y divide-black/5">
+              {postulaciones.map((p, i) => (
+                <tr key={p.id} className={`transition-colors hover:bg-orange/5 ${i % 2 === 1 ? "bg-surface/30" : ""}`}>
+                  <td className="px-4 py-3">
                     {p.estudiante ? (
-                      <>
-                        <p className="font-medium text-navy">
-                          {p.estudiante.nombreCompleto ?? p.estudiante.matricula}
-                        </p>
-                        <p className="text-xs text-black/50">
-                          {p.estudiante.matricula} · {p.estudiante.carrera.clave} · {p.estudiante.usuario.correo}
-                        </p>
-                      </>
+                      <div className="flex items-center gap-3">
+                        <Avatar
+                          nombre={p.estudiante.nombreCompleto ?? p.estudiante.matricula}
+                          className="h-9 w-9 text-xs"
+                        />
+                        <div className="min-w-0">
+                          <p className="font-medium text-navy truncate">
+                            {p.estudiante.nombreCompleto ?? p.estudiante.matricula}
+                          </p>
+                          <p className="text-xs text-black/50 truncate">
+                            {p.estudiante.matricula} · {p.estudiante.carrera.clave} · {p.estudiante.usuario.correo}
+                          </p>
+                        </div>
+                      </div>
                     ) : (
                       "—"
                     )}
                   </td>
-                  <td className="px-4 py-2">{p.vacante.titulo}</td>
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-3 text-black/80">{p.vacante.titulo}</td>
+                  <td className="px-4 py-3">
                     {p.estudiante?.cv ? (
                       <a
                         href={urlCompletaDelCv(p.estudiante.cv.archivoUrl)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-orange font-medium hover:underline"
+                        className="inline-flex items-center gap-1.5 text-orange font-medium hover:underline"
                       >
-                        Ver CV ({p.estudiante.cv.porcentaje}%)
+                        <FileTextIcon className="h-4 w-4" />
+                        <Badge tone={tonoPorPorcentajeCv(p.estudiante.cv.porcentaje)}>
+                          {p.estudiante.cv.porcentaje}%
+                        </Badge>
                       </a>
                     ) : (
                       <span className="text-black/40">Sin CV</span>
                     )}
                   </td>
-                  <td className="px-4 py-2">{p.estatus}</td>
-                  <td className="px-4 py-2">
-                    <select
+                  <td className="px-4 py-3">
+                    <Badge tone={TONO_ESTATUS[p.estatus]}>{ETIQUETA_ESTATUS[p.estatus] ?? p.estatus}</Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    <Select
+                      size="sm"
                       value={p.estatus}
                       onChange={(e) => handleCambiarEstatus(p.id, e.target.value as EstatusPostulacion)}
-                      className="rounded-md border border-black/20 px-2 py-1 text-xs"
                     >
                       {COLUMNAS_KANBAN.map((c) => (
                         <option key={c.estatus} value={c.estatus}>
                           {c.titulo}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </td>
                 </tr>
               ))}
