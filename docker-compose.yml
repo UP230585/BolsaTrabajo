@@ -33,7 +33,12 @@ services:
       JWT_EXPIRES_IN: "7d"
       PORT: 4000
       NODE_ENV: production
-      CORS_ORIGIN: "http://localhost:3000"
+      # El frontend de este docker-compose se sirve en el puerto 8080 (ver
+      # mapeo "8080:80" abajo), no en 3000. CORS_ORIGIN debe coincidir con
+      # el origen real desde el que el navegador llama a la API o TODAS las
+      # peticiones (login, registro, listar vacantes, etc.) se rechazan por
+      # CORS. 3000 es el puerto de `npm run dev` en local, no el de este compose.
+      CORS_ORIGIN: "http://localhost:8080"
     ports:
       - "4000:4000"
     volumes:
