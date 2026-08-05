@@ -1,10 +1,16 @@
 import { vacanteRepository } from "../repositories/vacante.repository";
 import { AppError } from "../middlewares/error.middleware";
-import type { ActualizarVacanteDTO, CrearVacanteDTO, FiltrosVacanteDTO } from "../dtos/vacante.dto";
+import { VACANTES_POR_PAGINA, type ActualizarVacanteDTO, type CrearVacanteDTO, type FiltrosVacanteDTO } from "../dtos/vacante.dto";
 
 export const vacanteService = {
-  listar(filtros: FiltrosVacanteDTO) {
-    return vacanteRepository.findMany(filtros);
+  async listar(filtros: FiltrosVacanteDTO) {
+    const { items, total } = await vacanteRepository.findMany(filtros);
+    return {
+      items,
+      total,
+      pagina: filtros.pagina,
+      totalPaginas: Math.max(1, Math.ceil(total / VACANTES_POR_PAGINA)),
+    };
   },
 
   async obtener(id: number) {
@@ -22,10 +28,11 @@ export const vacanteService = {
   crear(empresaId: number, datos: CrearVacanteDTO) {
     // Nace no aprobada: la Coordinación debe revisarla antes de que sea
     // visible en el listado público (HU-05, criterio de aceptación).
-    const { salario, ...resto } = datos;
+    const { salario, fechaLimite, ...resto } = datos;
     return vacanteRepository.create(empresaId, {
       ...resto,
       ...(salario !== undefined ? { salario } : {}),
+      ...(fechaLimite !== undefined ? { fechaLimite } : {}),
     });
   },
 

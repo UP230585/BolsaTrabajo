@@ -13,12 +13,20 @@ export interface Vacante {
   cuatrimestreMin: number;
   modalidad: Modalidad;
   salario: string | null;
+  fechaLimite: string | null;
   activa: boolean;
   aprobada: boolean;
   creadaEn: string;
   carrera: Carrera;
   empresa: { id: number; razonSocial: string };
   _count?: { postulaciones: number };
+}
+
+export interface VacantesPaginadas {
+  items: Vacante[];
+  total: number;
+  pagina: number;
+  totalPaginas: number;
 }
 
 export interface CrearVacanteInput {
@@ -28,6 +36,7 @@ export interface CrearVacanteInput {
   cuatrimestreMin: number;
   modalidad: Modalidad;
   salario?: number;
+  fechaLimite?: string;
 }
 
 export interface FiltrosVacantes {
@@ -35,6 +44,7 @@ export interface FiltrosVacantes {
   cuatrimestre?: number;
   modalidad?: Modalidad;
   q?: string;
+  pagina?: number;
 }
 
 export interface ActualizarVacanteInput {
@@ -44,4 +54,5 @@ export interface ActualizarVacanteInput {
   cuatrimestreMin?: number;
   modalidad?: Modalidad;
   salario?: number;
+  fechaLimite?: string;
 }

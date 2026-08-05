@@ -1,28 +1,39 @@
 import { prisma } from "../config/prisma";
-import type { Modalidad } from "@prisma/client";
-import type { FiltrosVacanteDTO } from "../dtos/vacante.dto";
+import type { Modalidad, Prisma } from "@prisma/client";
+import { VACANTES_POR_PAGINA, type FiltrosVacanteDTO } from "../dtos/vacante.dto";
+
+function whereDeFiltros(filtros: FiltrosVacanteDTO): Prisma.VacanteWhereInput {
+  return {
+    activa: true,
+    aprobada: true,
+    ...(filtros.carreraId ? { carreraId: filtros.carreraId } : {}),
+    ...(filtros.cuatrimestre ? { cuatrimestreMin: { lte: filtros.cuatrimestre } } : {}),
+    ...(filtros.modalidad ? { modalidad: filtros.modalidad as Modalidad } : {}),
+    ...(filtros.q
+      ? {
+          OR: [
+            { titulo: { contains: filtros.q } },
+            { descripcion: { contains: filtros.q } },
+          ],
+        }
+      : {}),
+  };
+}
 
 export const vacanteRepository = {
-  findMany(filtros: FiltrosVacanteDTO) {
-    return prisma.vacante.findMany({
-      where: {
-        activa: true,
-        aprobada: true,
-        ...(filtros.carreraId ? { carreraId: filtros.carreraId } : {}),
-        ...(filtros.cuatrimestre ? { cuatrimestreMin: { lte: filtros.cuatrimestre } } : {}),
-        ...(filtros.modalidad ? { modalidad: filtros.modalidad as Modalidad } : {}),
-        ...(filtros.q
-          ? {
-              OR: [
-                { titulo: { contains: filtros.q } },
-                { descripcion: { contains: filtros.q } },
-              ],
-            }
-          : {}),
-      },
-      include: { carrera: true, empresa: true },
-      orderBy: { creadaEn: "desc" },
-    });
+  async findMany(filtros: FiltrosVacanteDTO) {
+    const where = whereDeFiltros(filtros);
+    const [items, total] = await Promise.all([
+      prisma.vacante.findMany({
+        where,
+        include: { carrera: true, empresa: true },
+        orderBy: { creadaEn: "desc" },
+        skip: (filtros.pagina - 1) * VACANTES_POR_PAGINA,
+        take: VACANTES_POR_PAGINA,
+      }),
+      prisma.vacante.count({ where }),
+    ]);
+    return { items, total };
   },
 
   findById(id: number) {
@@ -47,6 +58,7 @@ export const vacanteRepository = {
     cuatrimestreMin: number;
     modalidad: Modalidad;
     salario?: number;
+    fechaLimite?: Date;
   }) {
     return prisma.vacante.create({
       data: { ...datos, empresaId, aprobada: false, activa: true },
@@ -60,6 +72,7 @@ export const vacanteRepository = {
     cuatrimestreMin?: number | undefined;
     modalidad?: Modalidad | undefined;
     salario?: number | undefined;
+    fechaLimite?: Date | undefined;
     aprobada?: boolean | undefined;
   }) {
     // Spread condicional en vez de pasar "datos" tal cual: con
@@ -74,6 +87,7 @@ export const vacanteRepository = {
         ...(datos.cuatrimestreMin !== undefined ? { cuatrimestreMin: datos.cuatrimestreMin } : {}),
         ...(datos.modalidad !== undefined ? { modalidad: datos.modalidad } : {}),
         ...(datos.salario !== undefined ? { salario: datos.salario } : {}),
+        ...(datos.fechaLimite !== undefined ? { fechaLimite: datos.fechaLimite } : {}),
         ...(datos.aprobada !== undefined ? { aprobada: datos.aprobada } : {}),
       },
       include: { carrera: true, empresa: true },

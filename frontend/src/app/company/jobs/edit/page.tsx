@@ -32,6 +32,7 @@ function EditarVacanteContent() {
     cuatrimestreMin: 1,
     modalidad: "PRESENCIAL" as Modalidad,
     salario: "",
+    fechaLimite: "",
   });
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +49,8 @@ function EditarVacanteContent() {
           cuatrimestreMin: vacante.cuatrimestreMin,
           modalidad: vacante.modalidad,
           salario: vacante.salario ?? "",
+          // El input date solo acepta YYYY-MM-DD; la API entrega ISO completo.
+          fechaLimite: vacante.fechaLimite ? vacante.fechaLimite.slice(0, 10) : "",
         });
       })
       .catch(() => setError("No se pudo cargar la vacante."))
@@ -62,6 +65,7 @@ function EditarVacanteContent() {
       await actualizarVacanteRequest(id, {
         ...form,
         salario: form.salario ? Number(form.salario) : undefined,
+        fechaLimite: form.fechaLimite || undefined,
       });
       router.push("/company/dashboard");
     } catch {
@@ -156,6 +160,15 @@ function EditarVacanteContent() {
               placeholder="8000"
             />
           </div>
+        </div>
+
+        <div>
+          <Label>Fecha límite de postulación (opcional)</Label>
+          <Input
+            type="date"
+            value={form.fechaLimite}
+            onChange={(e) => setForm({ ...form, fechaLimite: e.target.value })}
+          />
         </div>
 
         {error && <p className="text-sm text-danger">{error}</p>}

@@ -18,6 +18,7 @@ export default function NuevaVacantePage() {
     cuatrimestreMin: 1,
     modalidad: "PRESENCIAL" as Modalidad,
     salario: "",
+    fechaLimite: "",
   });
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -37,6 +38,7 @@ export default function NuevaVacantePage() {
       await crearVacanteRequest({
         ...form,
         salario: form.salario ? Number(form.salario) : undefined,
+        fechaLimite: form.fechaLimite || undefined,
       });
       router.push("/company/dashboard");
     } catch {
@@ -127,6 +129,15 @@ export default function NuevaVacantePage() {
               placeholder="8000"
             />
           </div>
+        </div>
+
+        <div>
+          <Label>Fecha límite de postulación (opcional)</Label>
+          <Input
+            type="date"
+            value={form.fechaLimite}
+            onChange={(e) => setForm({ ...form, fechaLimite: e.target.value })}
+          />
         </div>
 
         {error && <p className="text-sm text-danger">{error}</p>}

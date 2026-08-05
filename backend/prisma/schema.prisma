@@ -94,6 +94,7 @@ model Estudiante {
   postulaciones   Postulacion[]
   insignias       EstudianteInsignia[]
   conversaciones  Conversacion[]
+  guardadas       VacanteGuardada[]
 
   @@map("estudiantes")
 }
@@ -148,6 +149,7 @@ model Vacante {
   cuatrimestreMin Int
   modalidad       Modalidad @default(PRESENCIAL)
   salario         Decimal?  @db.Decimal(10, 2)
+  fechaLimite     DateTime? @db.Date
   activa          Boolean   @default(true)
   aprobada        Boolean   @default(false)
   creadaEn        DateTime  @default(now())
@@ -155,8 +157,26 @@ model Vacante {
   empresa         Empresa       @relation(fields: [empresaId], references: [id], onDelete: Cascade)
   carrera         Carrera       @relation(fields: [carreraId], references: [id])
   postulaciones   Postulacion[]
+  guardadas       VacanteGuardada[]
 
   @@map("vacantes")
+}
+
+// ---------------------------------------------------------------------------
+// Vacantes guardadas (favoritos del estudiante)
+// ---------------------------------------------------------------------------
+
+model VacanteGuardada {
+  id           Int      @id @default(autoincrement())
+  estudianteId Int
+  vacanteId    Int
+  creadaEn     DateTime @default(now())
+
+  estudiante   Estudiante @relation(fields: [estudianteId], references: [id], onDelete: Cascade)
+  vacante      Vacante    @relation(fields: [vacanteId], references: [id], onDelete: Cascade)
+
+  @@unique([estudianteId, vacanteId])
+  @@map("vacantes_guardadas")
 }
 
 // ---------------------------------------------------------------------------

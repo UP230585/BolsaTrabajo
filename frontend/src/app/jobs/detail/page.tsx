@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { obtenerVacanteRequest } from "@/services/jobs.service";
 import { postularseRequest } from "@/services/applications.service";
+import { misGuardadasRequest, guardarVacanteRequest, quitarVacanteRequest } from "@/services/favorites.service";
 import { useAuth } from "@/context/AuthContext";
 import { useAsync } from "@/hooks/useAsync";
 import type { Vacante } from "@/types/jobs";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
+import { BookmarkIcon } from "@/components/ui/icons";
 import { PageLoading } from "@/components/ui/PageState";
+import { fechaRelativa, estaVencida } from "@/lib/date";
 
 const ETIQUETA_MODALIDAD: Record<Vacante["modalidad"], string> = {
   PRESENCIAL: "Presencial",
@@ -43,6 +46,31 @@ function JobDetailContent() {
   } = useAsync<Vacante>(() => obtenerVacanteRequest(id), [id], "No se pudo cargar esta vacante.");
   const [postulando, setPostulando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
+  const [guardada, setGuardada] = useState(false);
+  const [guardando, setGuardando] = useState(false);
+
+  useEffect(() => {
+    if (usuario?.rol !== "ESTUDIANTE") return;
+    misGuardadasRequest()
+      .then((guardadas) => setGuardada(guardadas.some((g) => g.vacante.id === id)))
+      .catch(() => {});
+  }, [usuario, id]);
+
+  async function handleToggleGuardar() {
+    setGuardando(true);
+    try {
+      if (guardada) {
+        await quitarVacanteRequest(id);
+      } else {
+        await guardarVacanteRequest(id);
+      }
+      setGuardada(!guardada);
+    } catch {
+      // No bloquea la pantalla: el estado del botón simplemente no cambia.
+    } finally {
+      setGuardando(false);
+    }
+  }
 
   async function handlePostularme() {
     setPostulando(true);
@@ -81,8 +109,22 @@ function JobDetailContent() {
           <div>
             <h1 className="text-2xl font-semibold text-navy">{vacante.titulo}</h1>
             <p className="text-black/60">{vacante.empresa.razonSocial}</p>
+            <p className="text-xs text-black/40 mt-1">Publicada {fechaRelativa(vacante.creadaEn)}</p>
           </div>
-          <Badge tone="neutral">{ETIQUETA_MODALIDAD[vacante.modalidad]}</Badge>
+          <div className="flex items-center gap-3 shrink-0">
+            {usuario?.rol === "ESTUDIANTE" && (
+              <button
+                type="button"
+                aria-label={guardada ? "Quitar de guardados" : "Guardar vacante"}
+                onClick={handleToggleGuardar}
+                disabled={guardando}
+                className="text-navy/40 hover:text-orange transition-colors disabled:opacity-50"
+              >
+                <BookmarkIcon className="h-5 w-5" fill={guardada ? "currentColor" : "none"} />
+              </button>
+            )}
+            <Badge tone="neutral">{ETIQUETA_MODALIDAD[vacante.modalidad]}</Badge>
+          </div>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -90,6 +132,11 @@ function JobDetailContent() {
           <Badge tone="navy">Desde {vacante.cuatrimestreMin}° cuatrimestre</Badge>
           {vacante.salario && (
             <Badge tone="success">${Number(vacante.salario).toLocaleString("es-MX")}</Badge>
+          )}
+          {vacante.fechaLimite && (
+            <Badge tone={estaVencida(vacante.fechaLimite) ? "danger" : "warning"}>
+              {estaVencida(vacante.fechaLimite) ? "Cierre vencido" : `Cierra ${fechaRelativa(vacante.fechaLimite)}`}
+            </Badge>
           )}
         </div>
 
