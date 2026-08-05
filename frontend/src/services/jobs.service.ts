@@ -1,10 +1,12 @@
 import { api } from "./api";
 import type { ApiEnvelope } from "@/types/auth";
-import type { Vacante, CrearVacanteInput, ActualizarVacanteInput, FiltrosVacantes } from "@/types/jobs";
+import type { Vacante, VacantesPaginadas, CrearVacanteInput, ActualizarVacanteInput, FiltrosVacantes } from "@/types/jobs";
 
-export async function listarVacantesRequest(filtros: FiltrosVacantes = {}): Promise<Vacante[]> {
-  const { data } = await api.get<ApiEnvelope<Vacante[]>>("/jobs", { params: filtros });
-  return data.data ?? [];
+const PAGINA_VACIA: VacantesPaginadas = { items: [], total: 0, pagina: 1, totalPaginas: 1 };
+
+export async function listarVacantesRequest(filtros: FiltrosVacantes = {}): Promise<VacantesPaginadas> {
+  const { data } = await api.get<ApiEnvelope<VacantesPaginadas>>("/jobs", { params: filtros });
+  return data.data ?? PAGINA_VACIA;
 }
 
 export async function obtenerVacanteRequest(id: number): Promise<Vacante> {

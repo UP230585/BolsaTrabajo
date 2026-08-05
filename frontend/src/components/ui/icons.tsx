@@ -100,6 +100,16 @@ export function BriefcaseIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+// A diferencia de los otros iconos, fill no viene fijo en "none": el
+// llamador lo controla para pintar el marcador lleno cuando está guardado.
+export function BookmarkIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4-7 4V4.5a1 1 0 0 1 1-1Z" />
+    </svg>
+  );
+}
+
 export function KeyIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" {...props}>

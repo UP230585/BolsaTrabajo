@@ -43,6 +43,7 @@ export function Header() {
             <>
               <NavLink href="/student/dashboard">Mi dashboard</NavLink>
               <NavLink href="/student/applications">Mis postulaciones</NavLink>
+              <NavLink href="/student/saved">Guardadas</NavLink>
               <NavLink href="/chat">Mensajes</NavLink>
             </>
           )}
