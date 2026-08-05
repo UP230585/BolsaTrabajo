@@ -28,6 +28,11 @@ function esSegmentoDinamico(segmento: string): boolean {
   return /^\d+$/.test(segmento) || !ETIQUETAS[segmento];
 }
 
+// Segmentos intermedios que agrupan rutas (student, company, register) pero
+// no tienen una page.tsx propia: si se convierten en link, dan 404. Se
+// muestran como texto plano en vez de enlace.
+const SIN_PAGINA_PROPIA = new Set(["/student", "/company", "/register", "/company/jobs"]);
+
 export function Breadcrumbs() {
   const pathname = usePathname();
 
@@ -53,8 +58,11 @@ export function Breadcrumbs() {
         {items.map((item) => (
           <span key={item.href} className="flex items-center gap-1.5">
             <span className="text-black/30">/</span>
-            {item.esUltimo ? (
-              <span className="text-navy font-medium" aria-current="page">
+            {item.esUltimo || SIN_PAGINA_PROPIA.has(item.href) ? (
+              <span
+                className={item.esUltimo ? "text-navy font-medium" : undefined}
+                aria-current={item.esUltimo ? "page" : undefined}
+              >
                 {item.etiqueta}
               </span>
             ) : (

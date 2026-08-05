@@ -92,6 +92,8 @@ export default function RegistroEstudiantePage() {
               type="text"
               required
               minLength={3}
+              pattern="\S+(\s+\S+)+"
+              title="Ingresa nombre y apellido"
               value={form.nombreCompleto}
               onChange={(e) => setForm({ ...form, nombreCompleto: e.target.value })}
               placeholder="Como aparece en tu credencial"
@@ -115,8 +117,11 @@ export default function RegistroEstudiantePage() {
               <Input
                 type="text"
                 required
+                pattern="UP\d{6}"
+                title="Formato: UP seguido de 6 números (ej. UP230585)"
+                placeholder="UP230585"
                 value={form.matricula}
-                onChange={(e) => setForm({ ...form, matricula: e.target.value })}
+                onChange={(e) => setForm({ ...form, matricula: e.target.value.toUpperCase() })}
               />
             </div>
           </div>
