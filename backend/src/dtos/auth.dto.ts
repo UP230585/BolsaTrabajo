@@ -9,8 +9,15 @@ const correoEstudianteSchema = z.string().email().refine((correo) => correo.ends
 export const registrarEstudianteSchema = z.object({
   correo: correoEstudianteSchema,
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
-  nombreCompleto: z.string().trim().min(3, "Ingresa tu nombre completo"),
-  matricula: z.string().min(4),
+  nombreCompleto: z
+    .string()
+    .trim()
+    .min(3, "Ingresa tu nombre completo")
+    .refine((nombre) => nombre.split(/\s+/).filter(Boolean).length >= 2, {
+      message: "Ingresa nombre y apellido",
+    }),
+  // Formato de matrícula UPA: "UP" seguido de 6 dígitos, p. ej. UP230585.
+  matricula: z.string().trim().regex(/^UP\d{6}$/, "La matrícula debe tener el formato UP seguido de 6 números (ej. UP230585)"),
   carreraId: z.number().int().positive(),
   cuatrimestre: z.number().int().min(1).max(9),
 });
